@@ -1,15 +1,17 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # files
-*.sqlite3 # ignore all datbase files
-*.json # ignor all json file as they are too big
-*.bkup # ignore all backup files
+/backend/db.sqlite3 # ignore all datbase files
+.scrapers/dictionary_scraper/dictionary.json
+/scrapers/dictionary_scraper/dictionary.json.bkup
+
 
 # ignore setting file
 backend/config/settings.py
 
 # dependencies
 /node_modules
+frontend/node_modules
 /.pnp
 .pnp.js
 
