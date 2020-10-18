@@ -3,7 +3,8 @@ from django.db import models
 # Create your models here.
 
 class Word(models.Model):
-    title = models.CharField(primary_key=True, max_length=200, blank=False)
+    w_id = models.CharField(primary_key=True, max_length=200, blank=False)
+    word = models.CharField(max_length=200, blank=False)
     url = models.CharField(max_length=200, blank=True)
     etymology = models.TextField(blank=True)
     notes = models.TextField(blank=True)

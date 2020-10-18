@@ -26,15 +26,12 @@ def dump_to_json(dictionary, dest_file="out_file.json"):
 def remove_duplicates(dictionary):
     done_words = []
     new_dict = []
-
-    def append_entry(entry):
-        done_words.append(entry['link_id']) 
-        new_dict.append(entry)
-
     for entry in dictionary:
         if entry['link_id'] not in done_words:
-            append_entry(entry)
-
+            done_words.append(entry['link_id']) 
+            new_dict.append(entry)
+        else:
+            print(f"{entry['link_id']} was a duplicate!")
     return new_dict
 
 def remove_entry(dictionary):
@@ -96,8 +93,9 @@ def check_missing_entries(dictionary):
 
 #entry_list =  get_sorted_entries(dictionary)
 #dictionary = set_all_lowercase(dictionary)
-#sort_dictionary(dictionary)
-#dump_to_json(dictionary, "dictionary.json")
+#dictionary = remove_duplicates(dictionary)
+sort_dictionary(dictionary) # sorting is done in place
+dump_to_json(dictionary, "dictionary.json")
 #missing_entries = check_missing_entries(dictionary)
 #dump_to_json(missing_entries, "missing_entries.json")
 

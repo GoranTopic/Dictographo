@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.8
 """
 ==============
-Populate Django SQL data base with a dictionary file
+Populate Django SQL data base with a dictionary json file
 ==============
 
 """
@@ -9,8 +9,10 @@ import json
 import sys
 from api.models import Word, Example, Definition, Synonym_Relation
 
+dict_location = "../scrapers/dictionary_scraper/dictionary.py"
+
 try:
-    dfile = open("scripts/sortedDictionary.json", "r")
+    dict_file = open(dict_location, "r")
 except:
     print("Could not open dict file")
     exit()
@@ -18,7 +20,7 @@ except:
 print("found dict file")
 
 # load dic file from json format
-dictionary = json.load(dfile)
+dictionary = json.load(dict_file)
 
 
 print("Loaded: reading file")
@@ -31,7 +33,7 @@ syno_objs = []
 for entry in dictionary:
     print(f"getting word: {entry['word']}")
     # make the word objec
-    word_obj = Word(title=entry['word'], url=entry['url'], etymology=entry['etymology'], notes=entry['notes'])
+    word_obj = Word(w_id=entry['link_id'], word=entry['word'], url=entry['url'], etymology=entry['etymology'], notes=entry['notes'])
     # make the definition objects
     definitions = entry['definitions']
     if isinstance(definitions, list): 
