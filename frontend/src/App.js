@@ -7,6 +7,23 @@ import {ProSidebar, SidebarHeader, SidebarContent, Menu, MenuItem, SubMenu  } fr
 import 'react-pro-sidebar/dist/css/styles.css';
 import { Nav, Navbar, NavDropdown, Form, FormControl, Button, Alert, Carousel, InputGroup  } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { FontAwesomeIcon  } from '@fortawesome/react-fontawesome'
+import { 
+		faLandmark, 
+		faStickyNote, 
+		faAlignLeft, 
+		//faAngleDoubleRight,
+		//faAngleDoubleLeft,
+		faBook,
+		faBookOpen,
+		//faDotCircle,
+		faCircle,
+		faProjectDiagram,
+		faScroll,
+		faSlidersH
+} from '@fortawesome/free-solid-svg-icons'
+
+
 
 const customStyles = {
 		content : {
@@ -19,7 +36,9 @@ const customStyles = {
 		}
 };
 
-const API_ENDPOINT = 'http://128.199.9.124:8080/api/v1/'
+
+//const API_ENDPOINT = 'http://128.199.9.124:8080/api/v1/' //production
+const API_ENDPOINT = 'http://127.0.0.1:8000/api/v1/' //debuging local
 
 // graph payload (with minimalist structure)
 const initial_state = {
@@ -35,6 +54,8 @@ const initial_state = {
 		DestinationTerm: '',
 		isDeepLinks: false,
 		showModal: false,
+		isSideBar: true,
+		
 };
 
 function App() {
@@ -145,6 +166,11 @@ function App() {
 										...state,
 										isDeepLinks: !state.isDeepLinks,
 								};
+						case 'TOGGLE_SIDE_BAR':
+								return {
+										...state,
+										isSideBar: !state.isSideBar,
+								};
 						case 'SET_FETCH_FAILED':
 								return {
 										...state,
@@ -161,7 +187,8 @@ function App() {
 		const processNode = (node) =>{
 				/* process a node from the api into one for the dispatcher
 				 * it changes title for id, for instance */
-				node['id'] = node.title;
+				node['id'] = node.w_id;
+				node['key'] = node.w_id;
 				node['isSelected'] = false;
 				node['color'] = colors.node.default;
 				return node
@@ -183,7 +210,13 @@ function App() {
 						if(isNotInState(synonym['synonym'])){
 								fetch(API_ENDPOINT + synonym["synonym"])
 										.then(result => result.json())
-										.then(result => processNode(result))
+										.then(result => {
+												console.log('processing node:')
+												console.log(API_ENDPOINT + synonym["synonym"])
+												console.log(synonym);
+												console.log(result)
+												return processNode(result)
+										})
 										.then(adjNode => {
 												dispatchState({
 														type: 'SET_NODE_LINK', 
@@ -238,33 +271,47 @@ function App() {
 				// need to fund a way to also run the default fuction 
 		};*/
 
+		const toogleSideBar = () => dispatchState({type:'TOGGLE_SIDE_BAR'})
+
 		const renderDefinitions = (node) => {
 				let syntaxes = new Set();
-				let isFirstDef = true;
-				const openFirst = () => { if(isFirstDef){ isFirstDef = false; return true }else{ return false}  }
 				node.definitions.forEach( def => syntaxes.add(def.syntax));
-				return <Menu><h1>Definitions:</h1>
-						{ [...syntaxes].map( syntax => 
-						<SubMenu title={syntax} open={openFirst()} >
-								{ node.definitions.map( (definition, i) => 
-										(syntax === definition.syntax)?
-												<div key={i}>
-														<SidebarContent>
-																<br />
-																<span style={{paddingRight: 2}}>{definition.definition}</span>
-														</SidebarContent> 
-												</div>: null
-								)}
-								</SubMenu> 
+				return <Menu>
+						{(!state.isSideBar)? <h1>Definitions:</h1>: <>< /> }
+						{ [...syntaxes].map( (syntax, i) => 
+								(i===0)?
+										<SubMenu key={i} title={syntax} open={true} icon={<FontAwesomeIcon icon={faCircle}/>}>
+												{ node.definitions.map( (definition, i) => 
+														(syntax === definition.syntax)?
+																<div key={i}>
+																		<SidebarContent>
+																				<br />
+																				<span style={{paddingRight: 2}}>{definition.definition}</span>
+																		</SidebarContent> 
+																</div>: null
+												)}
+										</SubMenu> 
+										:
+										<SubMenu key={i} title={syntax} icon={<FontAwesomeIcon icon={faCircle}/>} >
+												{ node.definitions.map( (definition, i) => 
+														(syntax === definition.syntax)?
+																<div key={i}>
+																		<SidebarContent>
+																				<br />
+																				<span style={{paddingRight: 2}}>{definition.definition}</span>
+																		</SidebarContent> 
+																</div>: null
+												)}
+										</SubMenu> 
 						) }
-								</Menu>
-						}
+				</Menu>
+		}
 
 		const renderExamples = (node) => {
 				return <>
 						{(node.examples.length !== 0)? 
 								<Menu popperArrow={true}>
-										<SubMenu title="Examples:" style={{fontSize:'20px'}}>
+										<SubMenu title="Examples:" icon={<FontAwesomeIcon icon={faAlignLeft}/>} style={{fontSize:'20px'}}>
 												{ node.examples.map( (example, i) => 
 												<SidebarContent key={i}>
 														<p>{example['example']}</p>
@@ -279,8 +326,8 @@ function App() {
 		const renderEtymology = (node) => {
 				return <>
 						{(node.etymology !== "")? 
-								<Menu popperArrow={true}>
-										<SubMenu title="Etymology:" style={{fontSize:'20px'}}>
+								<Menu popperArrow={true} >
+										<SubMenu title="Etymology:" icon={<FontAwesomeIcon icon={faLandmark}/>} style={{fontSize:'20px'}}>
 												<SidebarContent>
 														<p>{node.etymology}</p>
 												</SidebarContent> 
@@ -294,7 +341,9 @@ function App() {
 				return <>
 						{(node.notes !== "")? 
 								<Menu popperArrow={true}>
-										<SubMenu title="Anotations:" style={{fontSize:'20px'}}>
+										<SubMenu title="Anotations:"
+												icon={<FontAwesomeIcon icon={faStickyNote}/>}
+												style={{fontSize:'20px'}}>
 												<SidebarContent>
 														<p>{node.Notes}</p>
 												</SidebarContent> 
@@ -307,7 +356,7 @@ function App() {
 				return <>
 						{(node.synonyms.length !== 0)? 
 								<Menu popperArrow={true}>
-										<SubMenu title="Synonyms:" style={{fontSize:'20px'}}>
+										<SubMenu title="Synonyms:" icon={<FontAwesomeIcon icon={faProjectDiagram}/>} style={{fontSize:'20px'}}>
 												{ node.synonyms.map( (synonym, i) => 
 												<MenuItem key={i} active={true}
 														onClick={()=> onClickNode(synonym['synonym'])} >
@@ -336,18 +385,16 @@ function App() {
 
 		return (
 				<div className="App">
-						<Navbar expand="lg" variant="dark" style={{backgroundColor: colors.black}}>
-								<a href="#home">
-										<img
-												src="/logo.png"
-												width="150"
+						<Navbar expand="lg" className="justify-content-center"  variant="dark" style={{backgroundColor: colors.black}}>
+								<a href="index.html">
+										<img src="/logo.png" width="150"
 												height="70"
-												className="d-inline-block align-top"
-												alt="React Bootstrap logo"
-										/>
+												alt="React Bootstrap logo" />
 								</a>
-								<Navbar.Brand href="#home"><h1>Dictographo</h1></Navbar.Brand>
-								<InputGroup inline siz='lg' className="pl-5 px-3 w-50">
+								<Navbar.Brand href="index.html" className="row"  >
+										<h1>Dictographo</h1>
+								</Navbar.Brand>
+								<InputGroup  size='lg' md='auto' className="mx-3" style={{maxWidth: "600px"}} >
 										<FormControl size="lg" as='input' type="text" placeholder="Search" 
 												value={state.searchTerm} onChange={handleSearchChange} 
 												onKeyPress={event => (event.key === "Enter") && handleSearchSubmit()}/>
@@ -355,11 +402,12 @@ function App() {
 												<Button size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
 										</InputGroup.Append>
 								</InputGroup>
-								<Form inline >
-								</Form>
 								<Navbar.Collapse id="basic-navbar-nav">
 										<Nav className="ml-auto mx-4">
-												<NavDropdown variant="dark" size="lg" title="Options" id="basic-nav-dropdown">
+												<NavDropdown variant="dark"
+														size="lg" title="Options" 
+														icon={<FontAwesomeIcon icon={faSlidersH}/>}
+														id="basic-nav-dropdown">
 														<NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
 														<NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
 														<NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
@@ -378,9 +426,9 @@ function App() {
 														src="graph_scaled_down.jpg"
 														alt="First slide"
 												/>
-												<Carousel.Caption>
-														<h3>First slide label</h3>
-														<p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
+												<Carousel.Caption style={{color:colors.black}}>
+														<h3>Graphing the English Language </h3>
+														<p></p>
 												</Carousel.Caption>
 										</Carousel.Item>
 										<Carousel.Item>
@@ -389,9 +437,9 @@ function App() {
 														src="graph1.jpg"
 														alt="Third slide"
 												/>
-												<Carousel.Caption>
-														<h3>Second slide label</h3>
-														<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+												<Carousel.Caption style={{color:colors.black}}>
+														<h3>Over 400 thousand nodes!!</h3>
+														<p></p>
 												</Carousel.Caption>
 										</Carousel.Item>
 										<Carousel.Item>
@@ -400,9 +448,9 @@ function App() {
 														src="graph2.jpg"
 														alt="Third slide"
 												/>
-												<Carousel.Caption>
-														<h3>Third slide label</h3>
-														<p>Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
+												<Carousel.Caption style={{color:colors.black}}>
+														<h3>Over 600 thousand edges!!</h3>
+														<p></p>
 												</Carousel.Caption>
 										</Carousel.Item>
 										<Carousel.Item>
@@ -420,12 +468,42 @@ function App() {
 								:
 								<div style={{display: 'inline',}}>
 										<div style={{ float:'left', position: 'absolute', height:'91%'}}>
-												<ProSidebar width='450px'>
+												<ProSidebar collapsed={state.isSideBar} >
+														{(state.isSideBar)?
+																<MenuItem onClick={toogleSideBar} icon={
+																		<FontAwesomeIcon 
+																				style={{
+																						marginLeft:'1.7rem', marginTop:'1rem',
+																						height:'25px', width:'25px'}}
+																				icon={faBook}/>}
+																/>
+																:<MenuItem onClick={toogleSideBar} icon={
+																		<FontAwesomeIcon 
+																				style={{ 
+																						marginLeft:'6.5rem', marginTop:'1rem',
+																						height:'55px', width:'55px'}}
+																				icon={faBookOpen}/>}
+																/>
+														}
 														<Menu iconShape="square">
-																<SidebarHeader style={{textAlign:'center'}}>
-																		<h1>{state.definedNode.title} 
-																				({state.definedNode.definitions[0].syntax})</h1>
-																</SidebarHeader>
+																{(!state.isSideBar)?
+																		<SidebarHeader style={{textAlign:'center'}}>
+																				<h1>{state.definedNode.word}</h1>
+																				<i>{(state.definedNode.definitions[0])?
+																								state.definedNode.definitions[0].syntax
+																								: null
+																						}</i>
+																		</SidebarHeader> 
+																		: <SubMenu icon={<FontAwesomeIcon icon={faScroll}/>}>
+																				<MenuItem active={true} >
+																						<h1>{state.definedNode.word}</h1>
+																						<i>{(state.definedNode.definitions[0])?
+																										state.definedNode.definitions[0].syntax
+																										: null
+																								}</i>
+																				</MenuItem>
+																		</SubMenu>
+																}
 																{renderDefinitions(state.definedNode)}
 																{renderExamples(state.definedNode)}
 																{renderEtymology(state.definedNode)}
@@ -434,9 +512,7 @@ function App() {
 														</Menu>
 												</ProSidebar>
 										</div>
-										<div
-												style={{backgroundImage: 'url(./grid.png)'}}
-										>
+										<div style={{backgroundImage: 'url(./grid.png)'}} >
 												<Graph 
 														id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
 														data={state}

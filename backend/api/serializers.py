@@ -23,5 +23,5 @@ class WordSerializer(serializers.ModelSerializer):
     synonyms = Synonym_RelationSerializer(read_only=True, many=True) 
     class Meta:
         model = Word
-        fields = ('title', 'etymology', 'notes', 'examples', 'definitions', 'synonyms')
+        fields = ( 'w_id', 'word', 'etymology', 'notes', 'examples', 'definitions', 'synonyms')
 

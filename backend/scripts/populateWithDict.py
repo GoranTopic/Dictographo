@@ -7,9 +7,10 @@ Populate Django SQL data base with a dictionary json file
 """
 import json 
 import sys
+import html
 from api.models import Word, Example, Definition, Synonym_Relation
 
-dict_location = "../scrapers/dictionary_scraper/dictionary.py"
+dict_location = "/home/telix/dictographo/scrapers/dictionary_scraper/dictionary.json"
 
 try:
     dict_file = open(dict_location, "r")
@@ -64,13 +65,13 @@ def run():
     syno_objs = []
     for entry in dictionary:
         # get word
-        word_obj = Word.objects.get(title=entry['word'])
+        word_obj = Word.objects.get(w_id=entry['link_id'])
         synonyms = entry['synonyms']
         for synonym in synonyms:
             print(f"getting word: {entry['word']} synonym: {synonym}")
             try:
-                syno_obj = Word.objects.get(title=synonym)
-                syno_objs.append(Synonym_Relation(word_from=word_obj, word_to=syno_obj))
+                syno_obj = Word.objects.get(w_id=synonym)
+                syno_objs.append(Synonym_Relation(word_from=word_obj, synonym=syno_obj))
             except:
                 print(f"could not get synonym: {synonym}!")
                 err_file.write(synonym)

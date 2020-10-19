@@ -7,6 +7,8 @@ Check the dictionary for synonyms and integrity of the graph
 import json 
 import sys
 import bisect
+import html
+import urllib.parse
 
 # pass the dictionary file as argument
 if sys.argv[1] is not None:
@@ -53,6 +55,17 @@ def get_sorted_entries(dictionary):
     dump_to_json(no_def_entries, "no_def_entries.json")
     return entries
 
+def decode_html(dictionary):
+    for entry in dictionary:
+        print( f"decoding: {entry['link_id']}")
+        entry['link_id'] = html.unescape(entry['link_id'])
+        entry['link_id'] = urllib.parse.unquote(entry['link_id'])
+        for x in range(0, len(entry['synonyms'])):
+            entry['synonyms'][x] = urllib.parse.unquote(entry['synonyms'][x])
+            entry['synonyms'][x] = html.unescape(entry['synonyms'][x])
+        print( f"to:       {entry['link_id']}")
+    return dictionary
+
 def sort_dictionary(dictionary):
         def sort_title(entry):
             return entry["link_id"]
@@ -93,9 +106,10 @@ def check_missing_entries(dictionary):
 
 #entry_list =  get_sorted_entries(dictionary)
 #dictionary = set_all_lowercase(dictionary)
-#dictionary = remove_duplicates(dictionary)
+dictionary = decode_html(dictionary)
+dictionary = remove_duplicates(dictionary)
 sort_dictionary(dictionary) # sorting is done in place
 dump_to_json(dictionary, "dictionary.json")
-#missing_entries = check_missing_entries(dictionary)
-#dump_to_json(missing_entries, "missing_entries.json")
+missing_entries = check_missing_entries(dictionary)
+dump_to_json(missing_entries, "missing_entries.json")
 
