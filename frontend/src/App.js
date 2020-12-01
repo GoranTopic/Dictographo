@@ -438,7 +438,7 @@ function App() {
 														alt="Third slide"
 												/>
 												<Carousel.Caption style={{color:colors.black}}>
-														<h3>Over 400 thousand nodes!!</h3>
+														<h3>Over 400 thousand nodes!</h3>
 														<p></p>
 												</Carousel.Caption>
 										</Carousel.Item>
@@ -449,7 +449,7 @@ function App() {
 														alt="Third slide"
 												/>
 												<Carousel.Caption style={{color:colors.black}}>
-														<h3>Over 600 thousand edges!!</h3>
+														<h3>Over 600 thousand edges!</h3>
 														<p></p>
 												</Carousel.Caption>
 										</Carousel.Item>
