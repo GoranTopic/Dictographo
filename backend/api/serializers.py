@@ -25,3 +25,10 @@ class WordSerializer(serializers.ModelSerializer):
         model = Word
         fields = ( 'w_id', 'word', 'etymology', 'notes', 'examples', 'definitions', 'synonyms')
 
+class CharFieldSerializer(serializers.Serializer):
+    char_field = serializers.CharField(max_length=100)
+
+
+class QuerySearchSerializer(serializers.Serializer):
+    w_id = serializers.CharField(max_length=100)
+    word = serializers.CharField(max_length=100)

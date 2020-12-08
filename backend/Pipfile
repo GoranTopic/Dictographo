@@ -13,6 +13,7 @@ django-cors-headers = "*"
 gunicorn = "*"
 dj-database-url = "*"
 psycopg2-binary = "*"
+networkx = "*"
 
 [requires]
 python_version = "3.6"
