@@ -1,5 +1,9 @@
 import Modal from 'react-modal';
-
+/*
+ * ===================================
+ *      Modal Component for React
+ * ===================================
+ */
 
 const customStyles = {
 		content : {
