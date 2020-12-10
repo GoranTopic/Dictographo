@@ -1,9 +1,9 @@
 import React from 'react';
+import { initial_state, stateReducer } from './Components/State';
 import './App.css';
 import { Graph } from "react-d3-graph";
 import { myConfig, colors }  from "./myConfig";
-import Modal from 'react-modal';
-import {ProSidebar, SidebarHeader, SidebarContent, Menu, MenuItem, SubMenu  } from 'react-pro-sidebar';
+import { ProSidebar, SidebarHeader, SidebarContent, Menu, MenuItem, SubMenu  } from 'react-pro-sidebar';
 import 'react-pro-sidebar/dist/css/styles.css';
 import { Nav, Navbar, NavDropdown, Form, FormControl, Button, Alert, Carousel, InputGroup  } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -23,165 +23,17 @@ import {
 		faSlidersH
 } from '@fortawesome/free-solid-svg-icons'
 
+const DEBUGGING = true
+
+const API_ENDPOINT = DEBUGGING ? 
+	'http://127.0.0.1:8000/api/' :  //debuging local
+	'http://128.199.9.124:8080/api/' //production
 
 
-const customStyles = {
-		content : {
-				top          : '50%',
-				left         : '50%',
-				right        : 'auto',
-				bottom       : 'auto',
-				marginRight  : '-50%',
-				transform    : 'translate(-50%, -50%)'
-		}
-};
-
-
-//const API_ENDPOINT = 'http://128.199.9.124:8080/api/v1/' //production
-const API_ENDPOINT = 'http://127.0.0.1:8000/api/v1/' //debuging local
-
-// graph payload (with minimalist structure)
-const initial_state = {
-		nodes: [],
-		links: [],
-		selected:{},
-		definedNode:{},
-		isError: false,
-		isWordNotFound: false,
-		isEmpty: true,
-		isLoading: true,
-		searchTerm: '',
-		DestinationTerm: '',
-		isDeepLinks: false,
-		showModal: false,
-		isSideBar: true,
-		
-};
 
 function App() {
-		// make reducer for the words data and internal state 
-		const stateReducer = (state, action) =>{
-				let node;
-				switch (action.type){
-						case 'SET_NEW_NODES':
-								return { 
-										...state, 
-										nodes: [ ...state.nodes, ...action.payload ],
-								};
-						case 'SET_NEW_LINKS':
-								return { 
-										...state, 
-										links: [ ...state.links, ...action.payload ]
-								};
-						case 'SET_NODE_LINK':
-								return { 
-										...state, 
-										nodes: [ ...state.nodes, action.payload.node ],
-										links: [ ...state.links, action.payload.link ]
-								};
-						case 'SET_STATE':
-								return { 
-										...state, 
-										nodes: [ ...state.nodes, ...action.payload.nodes ],
-										links: [ ...state.links, ...action.payload.links ]
-								};
-						case 'SET_SEARCH_NODE':
-								return {
-										...state,
-										nodes: [ { ...action.payload, selected: true, color: colors.node.selected  } ],
-										links: [],
-										selected: action.payload, // save as selected
-										definedNode: action.payload, // save as a definietion 
-										isEmpty: false,
-								};
-						case 'SET_NODE_DONE':
-								node = state.nodes.filter( node => node.id === action.payload )[0];
-								return {
-										...state,
-										nodes: [ ...state.nodes, { ...node, color: colors.node.done }], 
-										isEmpty: false,
-								};
-						case 'SET_DEFINED_NODE':
-								node = state.nodes.filter( node => node.id === action.payload )[0];
-								return {
-										...state,
-										definedNode: node,
-								};
-						case 'ERASE_NODES':
-								return {
-										...state,
-										nodes: [],
-										links: [],
-								};
-						case 'SET_SEARCH_TERM':
-								return {
-										...state,
-										searchTerm: action.payload,				
-								};
-						case 'SET_DEST_TERM':
-								return {
-										...state,
-										destinationTerm: action.payload,
-								};
-						case 'SET_NODE_SELECTED':
-								return {
-										...state,
-										nodes: [ ...state.nodes, { ...action.payload, color: colors.node.selected }], // change color
-										selected: action.payload,
-								};
-						case 'SWITCH_SELECTED_NODE':
-								node = state.nodes.filter( node => node.id === action.payload )[0];
-								return {
-										...state,
-										nodes: [ 
-												...state.nodes, 
-												{ ...state.selected, color: colors.node.done, }, 
-												{ ...node, color: colors.node.selected },
-										],
-										selected: node,
-										definedNode: node,
-								};
-						case 'TOGGEL_MODAL':
-								return {
-										...state,
-										showModal: !state.showModal,
-								};
-						case 'SET_SHOW_MODAL':
-								return {
-										...state,
-										showModal: action.payload,
-								};
-						case 'SET_WORD_NOT_FOUND':
-								return {
-										...state,
-										isWordNotFound: true,
-								};
-						case 'DISSMISS_NOT_FOUND':
-								return {
-										...state,
-										isWordNotFound: false,
-								};
-						case 'SET_DEEP_LINKS':
-								return {
-										...state,
-										isDeepLinks: !state.isDeepLinks,
-								};
-						case 'TOGGLE_SIDE_BAR':
-								return {
-										...state,
-										isSideBar: !state.isSideBar,
-								};
-						case 'SET_FETCH_FAILED':
-								return {
-										...state,
-										isError: true,
-								};
-						default:
-								throw new Error();
-				}
-		}
-
 		/* define dispatcher for the Internal data */
+
 		const [state, dispatchState] = React.useReducer( stateReducer, initial_state );
 
 		const processNode = (node) =>{
@@ -210,13 +62,7 @@ function App() {
 						if(isNotInState(synonym['synonym'])){
 								fetch(API_ENDPOINT + synonym["synonym"])
 										.then(result => result.json())
-										.then(result => {
-												console.log('processing node:')
-												console.log(API_ENDPOINT + synonym["synonym"])
-												console.log(synonym);
-												console.log(result)
-												return processNode(result)
-										})
+										.then(result => processNode(result))
 										.then(adjNode => {
 												dispatchState({
 														type: 'SET_NODE_LINK', 
@@ -253,10 +99,6 @@ function App() {
 						.then(node => { dispatchState({type: 'SET_SEARCH_NODE', payload: node}); return node; })
 						.then(node => requestSynonymNodes(node))
 						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
-		}
-
-		const closeModal = () => {
-				dispatchState({type: 'SET_SHOW_MODAL', payload: false})
 		}
 
 		const onClickNode = function(nodeId) {
@@ -419,6 +261,7 @@ function App() {
 						</Navbar>
 						<AlertDismissibleExample />
 						{ state.isEmpty? 
+
 								<Carousel>
 										<Carousel.Item>
 												<img
@@ -465,6 +308,7 @@ function App() {
 												</Carousel.Caption>
 										</Carousel.Item>
 								</Carousel>
+
 								:
 								<div style={{display: 'inline',}}>
 										<div style={{ float:'left', position: 'absolute', height:'91%'}}>
@@ -523,17 +367,7 @@ function App() {
 										</div>
 								</div>
 						}
-						<div>
-								<Modal
-										isOpen={state.showModal}
-										onAfterOpen={() => console.log("models was opend")}
-										onRequestClose={closeModal}
-										style={customStyles}
-										contentLabel="Example Modal"
-								>
-										<div>I am a modal</div>
-								</Modal>
-						</div>
+						<div></div>
 				</div>
 		);
 }
