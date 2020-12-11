@@ -1,6 +1,6 @@
 import React  from 'react';
 import { Graph } from "react-d3-graph";
-import { myConfig }  from "../myConfig";
+import { graphConfig }  from "../myConfig";
 
 /*
  * =======================================
@@ -15,7 +15,7 @@ function GraphContainer({state, onClickNode}){
 						<Graph 
 								id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
 								data={state}
-								config={myConfig}
+								config={graphConfig}
 								onClickNode={onClickNode}
 								backgroundColor="black"
 						/>

@@ -1,5 +1,18 @@
 // the graph configuration, you only need to pass down properties
 // that you want to override, otherwise default ones will be used
+// Also misc. settings
+
+const DEBUGGING = true
+
+const API_ENDPOINT = DEBUGGING ? 
+	'http://127.0.0.1:8000/api/' :  //debuging local
+	'http://128.199.9.124:8080/api/' //production
+
+
+function getWindowDimensions() {
+		const { innerWidth: width, innerHeight: height  } = window;
+		return { width, height };
+}
 
 const {width, height } = getWindowDimensions();
 
@@ -27,7 +40,7 @@ const colors = {
 		}
 }
 
-const  myConfig = {
+const  graphConfig = {
 		"automaticRearrangeAfterDropNode": false,
 		"collapsible": false,
 		"directed": false,
@@ -88,12 +101,8 @@ const  myConfig = {
 				"strokeWidth": 1.5,
 				"markerHeight": 6,
 				"markerWidth": 6
+
 		}
 };
 
-function getWindowDimensions() {
-		const { innerWidth: width, innerHeight: height  } = window;
-		return { width, height };
-}
-
-export { myConfig, colors };
+export { DEBUGGING, API_ENDPOINT, graphConfig, colors, getWindowDimensions };
