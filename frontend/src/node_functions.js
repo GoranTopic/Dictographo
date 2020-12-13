@@ -22,12 +22,18 @@ const processNode = (node) =>{
 const getNode = (nodeId, state) => state.nodes.filter( node => node.id === nodeId )[0]
 
 // attemps to return true id node is not in state
-const isNotInState = (nodeId, state) => state.nodes.every( node => node.id !== nodeId )
+const isNewNode = (nodeId, state) => state.nodes.every( node => node.id !== nodeId )
 
-const requestSynonymNodes = (node, dispatchState) => {
+const onClickNode = (nodeId, state, dispatchState) => {
+		// when user clicks on a node
+		requestAdjecentNodes(getNode(nodeId, state), state, dispatchState)
+		dispatchState({type:'SWITCH_SELECTED_NODE', payload: nodeId})  
+};
+
+const requestAdjecentNodes = (node, state, dispatchState) => {
 		/* for every node request the adjecent node to it */
 		node.synonyms.forEach(synonym => {
-				if(isNotInState(synonym['synonym'])){
+				if(isNewNode(synonym['synonym'], state)){
 						fetch(API_ENDPOINT + synonym["synonym"])
 								.then(result => result.json())
 								.then(result => processNode(result))
@@ -58,16 +64,10 @@ const isWordNotFound = (response, dispatchState) =>{
 		}
 }
 
-const onClickNode = function(nodeId, dispatchState) {
-		// when user clicks on a node
-		requestSynonymNodes(getNode(nodeId))
-		dispatchState({type:'SWITCH_SELECTED_NODE', payload: nodeId})  
-};
-
 const onMouseOverNode = function(nodeId, dispatchState) {
 		dispatchState({type:'SET_DEFINED_NODE', payload: nodeId})  
 		// need to fund a way to also run the default fuction 
 };
 
-export { processNode, isWordNotFound, requestSynonymNodes, onClickNode, onMouseOverNode }
+export { processNode, isWordNotFound, requestAdjecentNodes, onClickNode, onMouseOverNode }
 

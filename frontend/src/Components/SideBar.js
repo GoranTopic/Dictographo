@@ -109,7 +109,7 @@ function SideBarContainer({state, dispatchState, onClickNode}){
 										<SubMenu title="Synonyms:" icon={<FontAwesomeIcon icon={faProjectDiagram}/>} style={{fontSize:'20px'}}>
 												{ node.synonyms.map( (synonym, i) => 
 												<MenuItem key={i} active={true}
-														onClick={()=> onClickNode(synonym['synonym'])} >
+														onClick={()=> onClickNode(synonym['synonym'], state, dispatchState)} >
 														{synonym['synonym']}
 												</MenuItem> 
 												) }

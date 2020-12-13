@@ -1,4 +1,3 @@
-import { onClickNode } from './node_functions';
 import { initial_state, stateReducer } from './Components/State';
 import CarouselContainer from './Components/Carousel';
 import SideBarContainer from './Components/SideBar';
@@ -27,11 +26,10 @@ function App() {
 								<div style={{display: 'inline',}}>
 										<SideBarContainer 
 												state={state}
-												dispatchState={dispatchState}
-												onClickNode={onClickNode}/>
+												dispatchState={dispatchState} />
 										<GraphContainer 
 												state={state}
-												onClickNode={onClickNode}/>
+												dispatchState={dispatchState} />
 								</div>
 						}
 				</div>

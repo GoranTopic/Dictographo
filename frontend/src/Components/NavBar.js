@@ -1,5 +1,5 @@
 import React  from 'react';
-import { processNode, isWordNotFound, requestSynonymNodes } from '../node_functions';
+import { processNode, isWordNotFound, requestAdjecentNodes } from '../node_functions';
 import { colors, API_ENDPOINT,  }  from "../myConfig";
 import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -22,11 +22,12 @@ function NavBarContainer({ state, dispatchState }){
 		const handleSearchSubmit = () =>  {
 				// console.log(state.search) very conviente
 				fetch(API_ENDPOINT + state.searchTerm)
+						// unpack json
 						.then(result => result.json())
 						.then(result => isWordNotFound(result))
 						.then(result => processNode(result))
 						.then(node => { dispatchState({type: 'SET_SEARCH_NODE', payload: node}); return node; })
-						.then(node => requestSynonymNodes(node))
+						.then(node => requestAdjecentNodes(node, state, dispatchState))
 						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 		}
 
