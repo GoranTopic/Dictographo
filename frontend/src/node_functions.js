@@ -32,6 +32,9 @@ const onClickNode = (nodeId, state, dispatchState) => {
 
 const requestAdjecentNodes = (node, state, dispatchState) => {
 		/* for every node request the adjecent node to it */
+
+
+		/*
 		node.synonyms.forEach(synonym => {
 				if(isNewNode(synonym['synonym'], state)){
 						fetch(API_ENDPOINT + synonym["synonym"])
@@ -52,6 +55,7 @@ const requestAdjecentNodes = (node, state, dispatchState) => {
 								.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
 				}
 		})
+				*/
 }
 
 const isWordNotFound = (response, dispatchState) =>{

@@ -1,6 +1,7 @@
 import React  from 'react';
 import { ProSidebar, SidebarHeader, SidebarContent, Menu, MenuItem, SubMenu  } from 'react-pro-sidebar';
 import 'react-pro-sidebar/dist/css/styles.css';
+import { onClickNode } from '../node_functions';
 import { FontAwesomeIcon  } from '@fortawesome/react-fontawesome'
 import { 
 		faLandmark, 
@@ -21,13 +22,13 @@ import {
  *     Using proSideBar 
  */
 
-function SideBarContainer({state, dispatchState, onClickNode}){
+function SideBarContainer({state, dispatchState}){
 
 		const renderDefinitions = (node) => {
 				let syntaxes = new Set();
 				node.definitions.forEach( def => syntaxes.add(def.syntax));
 				return <Menu>
-						{(!state.isSideBar)? <h1>Definitions:</h1>: <>< /> }
+						{(!state.isSideBar)? <h1>Definitions:</h1>: <></> }
 						{ [...syntaxes].map( (syntax, i) => 
 								(i===0)?
 										<SubMenu key={i} title={syntax} open={true} icon={<FontAwesomeIcon icon={faCircle}/>}>
@@ -102,6 +103,7 @@ function SideBarContainer({state, dispatchState, onClickNode}){
 						}
 				</>
 		}
+
 		const renderSynonyms = (node) => {
 				return <>
 						{(node.synonyms.length !== 0)? 
@@ -109,7 +111,7 @@ function SideBarContainer({state, dispatchState, onClickNode}){
 										<SubMenu title="Synonyms:" icon={<FontAwesomeIcon icon={faProjectDiagram}/>} style={{fontSize:'20px'}}>
 												{ node.synonyms.map( (synonym, i) => 
 												<MenuItem key={i} active={true}
-														onClick={()=> onClickNode(synonym['synonym'], state, dispatchState)} >
+														onClick={() => onClickNode(synonym['synonym'], state, dispatchState)} >
 														{synonym['synonym']}
 												</MenuItem> 
 												) }
@@ -120,8 +122,6 @@ function SideBarContainer({state, dispatchState, onClickNode}){
 		}
 
 		const toogleSideBar = () => dispatchState({type:'TOGGLE_SIDE_BAR'})
-
-
 
 		return(
 				<div style={{ float:'left', position: 'absolute', height:'91%'}}>

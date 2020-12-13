@@ -47,7 +47,7 @@ class NeighborsDetail(generics.ListAPIView):
         else:
             # if the word is in the db
             # get word form the db and appedn to the list of words
-            word_list.append(self.get_queryset().get(w_id=word))
+            #word_list.append(self.get_queryset().get(w_id=word))
             # query neighbors and append neighboring words too =)
             [word_list.append(word) for word in self.query_neighbors(kwargs['pk'])]
         # pass thru the serilizer as many 
