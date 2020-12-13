@@ -21,7 +21,8 @@ const processNode = (node) =>{
 // retrive node with given node id from state 
 const getNode = (nodeId, state) => state.nodes.filter( node => node.id === nodeId )[0]
 
-// attemps to return true id node is not in state
+// attemps to return true id node is not in state, 
+// maybe make a dic so that is it not n time
 const isNewNode = (nodeId, state) => state.nodes.every( node => node.id !== nodeId )
 
 const onClickNode = (nodeId, state, dispatchState) => {
@@ -32,15 +33,17 @@ const onClickNode = (nodeId, state, dispatchState) => {
 
 const requestAdjecentNodes = (node, state, dispatchState) => {
 		/* for every node request the adjecent node to it */
-
-
-		/*
-		node.synonyms.forEach(synonym => {
-				if(isNewNode(synonym['synonym'], state)){
-						fetch(API_ENDPOINT + synonym["synonym"])
-								.then(result => result.json())
-								.then(result => processNode(result))
-								.then(adjNode => {
+		let isDeepLinking = false
+		// define whether we should link te deeper
+		let graph_type = 'synonyms/' 
+		// define which type of graph we are requesting
+		fetch(API_ENDPOINT + graph_type + node.id )
+		// request the synonyms
+				.then(result => result.json())
+				.then(adjNodes => 
+						adjNodes.forEach(adjNode => {  
+								adjNode = processNode(adjNode);
+								if(isNewNode(adjNode.id, state) || isDeepLinking){
 										dispatchState({
 												type: 'SET_NODE_LINK', 
 												payload: { 
@@ -51,11 +54,10 @@ const requestAdjecentNodes = (node, state, dispatchState) => {
 														}
 												}
 										})
-								})
-								.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
-				}
-		})
-				*/
+								}
+						})
+				)
+				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
 }
 
 const isWordNotFound = (response, dispatchState) =>{
