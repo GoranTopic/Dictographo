@@ -21,7 +21,9 @@ function NavBarContainer({ state, dispatchState }){
 		// handle submit search button
 		const handleSearchSubmit = () =>  {
 				// console.log(state.search) very conviente
-				fetch(API_ENDPOINT + state.searchTerm)
+				let searchTerm = state.searchTerm.toLowerCase();
+				// set all serches to lowercase
+				fetch(API_ENDPOINT + searchTerm)
 						// unpack json
 						.then(result => result.json())
 						.then(result => isWordNotFound(result))
