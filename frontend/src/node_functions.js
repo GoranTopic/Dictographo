@@ -19,16 +19,31 @@ const processNode = (node) =>{
 }
 
 // retrive node with given node id from state 
-const getNode = (nodeId, state) => state.nodes.filter( node => node.id === nodeId )[0]
+const getNode = (nodeId, state) => state.nodes.filter( node => node.id === nodeId )[0];
 
 // attemps to return true id node is not in state
-const isNotInState = (nodeId, state) => state.nodes.every( node => node.id !== nodeId )
+const isNewWord = (nodeId, state) => state.nodes.every( node => node.id !== nodeId );
 
-const requestSynonymNodes = (node, dispatchState) => {
-		/* for every node request the adjecent node to it */
-		node.synonyms.forEach(synonym => {
-				if(isNotInState(synonym['synonym'])){
-						fetch(API_ENDPOINT + synonym["synonym"])
+const requestSynonymNodes = (nodeId, state, dispatchState) => {
+		/* askes the server for all the neiboring node from a given node id */
+		// if node is not complete
+		// otherwise request it
+		// unpack json
+		// check if not was found
+		// if it was for every node
+		// check if node is not alrady in state	
+		// if not, process node, 
+		// make an artificial wait 
+		// dispatch to state
+		console.log(nodeId)
+		fetch(API_ENDPOINT + 'synonyms/' + nodeId)
+				.then(result => result.json())
+				.then(nodes => { nodes.forEach(node => node = processNode(node)); return nodes })
+				.then(nodes => console.log(nodes))
+				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
+}
+		
+		/*
 								.then(result => result.json())
 								.then(result => processNode(result))
 								.then(adjNode => {
@@ -43,10 +58,8 @@ const requestSynonymNodes = (node, dispatchState) => {
 												}
 										})
 								})
-								.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
-				}
-		})
-}
+				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
+				*/
 
 const isWordNotFound = (response, dispatchState) =>{
 		// Set error to state when user search a word not found
@@ -69,5 +82,5 @@ const onMouseOverNode = function(nodeId, dispatchState) {
 		// need to fund a way to also run the default fuction 
 };
 
-export { processNode, isWordNotFound, requestSynonymNodes, onClickNode, onMouseOverNode }
+export { processNode, isWordNotFound, isNewWord, requestSynonymNodes, onClickNode, onMouseOverNode }
 

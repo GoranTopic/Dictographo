@@ -1,6 +1,6 @@
 import React  from 'react';
-import { processNode, isWordNotFound, requestSynonymNodes } from '../node_functions';
-import { colors, API_ENDPOINT,  }  from "../myConfig";
+import { requestSynonymNodes } from '../node_functions';
+import { colors }  from "../myConfig";
 import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon  } from '@fortawesome/react-fontawesome'
@@ -18,17 +18,25 @@ function NavBarContainer({ state, dispatchState }){
 		// handle the change by seting the state variable to 
 		const handleSearchChange = change => dispatchState({ type: 'SET_SEARCH_TERM', payload: change.target.value });
 
+
 		// handle submit search button
+		const handleSearchSubmit = () =>  { requestSynonymNodes(state.searchTerm, state, dispatchState) };
+
+		/*
 		const handleSearchSubmit = () =>  {
-				// console.log(state.search) very conviente
+				// handle submit search button
 				fetch(API_ENDPOINT + state.searchTerm)
 						.then(result => result.json())
-						.then(result => isWordNotFound(result))
+						.then(result => isWordNotFound(result, dispatchState))
 						.then(result => processNode(result))
-						.then(node => { dispatchState({type: 'SET_SEARCH_NODE', payload: node}); return node; })
-						.then(node => requestSynonymNodes(node))
+						.then(node => { 
+								dispatchState({type: 'SET_SEARCH_NODE', payload: node});
+								return node; 
+						})
+						.then(node => requestSynonymNodes(node, state, dispatchState))
 						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 		}
+		*/
 
 		return(
 				<Navbar expand="lg" className="justify-content-center"
