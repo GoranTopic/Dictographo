@@ -33,9 +33,9 @@ const onClickNode = (nodeId, state, dispatchState) => {
 
 const requestAdjecentNodes = (node, state, dispatchState) => {
 		/* for every node request the adjecent node to it */
-		let isDeepLinking = false
+		 let linkAll = state.isDeepLinks;
 		// define whether we should link te deeper
-		let graph_type = 'synonyms/' 
+		let graph_type = 'synonyms/';
 		// define which type of graph we are requesting
 		fetch(API_ENDPOINT + graph_type + node.id )
 		// request the synonyms
@@ -43,7 +43,7 @@ const requestAdjecentNodes = (node, state, dispatchState) => {
 				.then(adjNodes => 
 						adjNodes.forEach(adjNode => {  
 								adjNode = processNode(adjNode);
-								if(isNewNode(adjNode.id, state) || isDeepLinking){
+								if(linkAll || isNewNode(adjNode.id, state)){
 										dispatchState({
 												type: 'SET_NODE_LINK', 
 												payload: { 

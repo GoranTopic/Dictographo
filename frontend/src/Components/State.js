@@ -119,7 +119,7 @@ const stateReducer = (state, action) =>{
 								...state,
 								isWordNotFound: false,
 						};
-				case 'SET_DEEP_LINKS':
+				case 'TOGGLE_DEEP_LINKS':
 						return {
 								...state,
 								isDeepLinks: !state.isDeepLinks,

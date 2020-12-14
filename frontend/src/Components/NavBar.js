@@ -24,13 +24,28 @@ function NavBarContainer({ state, dispatchState }){
 				let searchTerm = state.searchTerm.toLowerCase();
 				// set all serches to lowercase
 				fetch(API_ENDPOINT + searchTerm)
-						// unpack json
+				// unpack json
 						.then(result => result.json())
 						.then(result => isWordNotFound(result))
 						.then(result => processNode(result))
 						.then(node => { dispatchState({type: 'SET_SEARCH_NODE', payload: node}); return node; })
 						.then(node => requestAdjecentNodes(node, state, dispatchState))
 						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
+		}
+		const handleToggleDeepLinks = () => {
+				let selectedNode = state.selected;
+				console.log(selectedNode)
+				if(!state.isEmpty){
+						fetch(API_ENDPOINT + selectedNode.id)
+						// unpack json
+								.then(result => result.json())
+								.then(result => isWordNotFound(result))
+								.then(result => processNode(result))
+								.then(node => { dispatchState({type: 'SET_SEARCH_NODE', payload: node}); return node; })
+								.then(node => requestAdjecentNodes(node, state, dispatchState))
+								.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
+				}
+				dispatchState({type:'TOGGLE_DEEP_LINKS'});
 		}
 
 		return(
@@ -62,7 +77,10 @@ function NavBarContainer({ state, dispatchState }){
 												<NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
 												<NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
 												<NavDropdown.Divider />
-												<Form.Check type="switch" id="custom-switch" label="Deep Links"/>
+												<Form.Check type="switch" id="custom-switch" label="Deep Links"
+														value={state.isDeepLinks} 
+														onChange={handleToggleDeepLinks}
+												/>
 										</NavDropdown>
 								</Nav>
 						</Navbar.Collapse>
