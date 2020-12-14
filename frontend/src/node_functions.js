@@ -31,6 +31,24 @@ const onClickNode = (nodeId, state, dispatchState) => {
 		dispatchState({type:'SWITCH_SELECTED_NODE', payload: nodeId})  
 };
 
+const queryNewWord = (word, state, dispatchState) => {
+				/* reset the graph state and start a new query into a word, 
+				 * sometime this stymes when it is called a second time,
+				 * this might be because of dispatchState being called twice
+				 * must investigate.
+				 */
+				fetch(API_ENDPOINT + word)
+				// unpack json
+						.then(result => result.json())
+						.then(result => isWordNotFound(result))
+						.then(result => processNode(result))
+						.then(node => { 
+								dispatchState({type: 'SET_NEW_NODE', payload: node}); 
+								return node; })
+						.then(node => requestAdjecentNodes(node, state, dispatchState))
+						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
+		}
+
 const requestAdjecentNodes = (node, state, dispatchState) => {
 		/* for every node request the adjecent node to it */
 		 let linkAll = state.isDeepLinks;
@@ -40,6 +58,7 @@ const requestAdjecentNodes = (node, state, dispatchState) => {
 		fetch(API_ENDPOINT + graph_type + node.id )
 		// request the synonyms
 				.then(result => result.json())
+				.then(result => isWordNotFound(result))
 				.then(adjNodes => 
 						adjNodes.forEach(adjNode => {  
 								adjNode = processNode(adjNode);
@@ -75,5 +94,5 @@ const onMouseOverNode = function(nodeId, dispatchState) {
 		// need to fund a way to also run the default fuction 
 };
 
-export { processNode, isWordNotFound, requestAdjecentNodes, onClickNode, onMouseOverNode }
+export { processNode, isWordNotFound, queryNewWord, requestAdjecentNodes, onClickNode, onMouseOverNode }
 

@@ -78,13 +78,15 @@ class PathDetail(generics.ListAPIView):
                 # if second and first is not in db
                 word_list.append(not_found_msg(self, second_word))
             else:
-                # if only first is not in not in db
+                # if second word is in in db
+                word_list.append(self.get_queryset().get(w_id=second_word))
                 [word_list.append(word) for word in query_neighbors(self, second_word)]
         else:
             # if first is in db
             if not Word.objects.filter(w_id=second_word).exists():
-                # if first word is in but second is not
+                # but second word is not im db
                 word_list.append(not_found_msg(self, second_word))
+                word_list.append(self.get_queryset().get(w_id=first_word))
                 [word_list.append(word) for word in NeighborsDetail.query_neighbors(self, first_word)]
             else:
                 # if both words are in the db
@@ -95,10 +97,14 @@ class PathDetail(generics.ListAPIView):
                 if(nx.has_path(self.synonym_graph, source_word, target_word)):
                     # get the shortest path
                     word_list = nx.shortest_path(self.synonym_graph, source_word, target_word) 
+                    #if word_list[0] is not source_word: word_list.insert(0, source_word)
+                    #if word_list[-1] is not target_word: word_list.append(target_word)
                 else:
                     # append both neibors to the result
-                    [word_list.append(word) for word in NeighborsDetail.query_neighbors(self, first_word)]
-                    [word_list.append(word) for word in NeighborsDetail.query_neighbors(self, second_word)]
+                    #[word_list.append(word) for word in NeighborsDetail.query_neighbors(self, first_word)]
+                    #[word_list.append(word) for word in NeighborsDetail.query_neighbors(self, second_word)]
+                    word_list.append({ 'w_id':  None, 'detail':'path not found' })
+
         # pass the word list thru the serilizer with parameter many 
         serializer = self.get_serializer(word_list, many=True)
         # tranfer as json 

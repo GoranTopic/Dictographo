@@ -1,6 +1,6 @@
 import React  from 'react';
-import { processNode, isWordNotFound, requestAdjecentNodes } from '../node_functions';
-import { colors, API_ENDPOINT,  }  from "../myConfig";
+import { queryNewWord, isWordNotFound, processNode } from '../node_functions';
+import { colors, API_ENDPOINT }  from "../myConfig";
 import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon  } from '@fortawesome/react-fontawesome'
@@ -18,35 +18,66 @@ function NavBarContainer({ state, dispatchState }){
 		// handle the change by seting the state variable to 
 		const handleSearchChange = change => dispatchState({ type: 'SET_SEARCH_TERM', payload: change.target.value });
 
-		// handle submit search button
 		const handleSearchSubmit = () =>  {
-				// console.log(state.search) very conviente
-				let searchTerm = state.searchTerm.toLowerCase();
+				/* handle submit search button */
+				//console.log(state.search) very conviente
 				// set all serches to lowercase
-				fetch(API_ENDPOINT + searchTerm)
-				// unpack json
-						.then(result => result.json())
-						.then(result => isWordNotFound(result))
-						.then(result => processNode(result))
-						.then(node => { dispatchState({type: 'SET_SEARCH_NODE', payload: node}); return node; })
-						.then(node => requestAdjecentNodes(node, state, dispatchState))
-						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
-		}
-		const handleToggleDeepLinks = () => {
-				let selectedNode = state.selected;
-				console.log(selectedNode)
-				if(!state.isEmpty){
-						fetch(API_ENDPOINT + selectedNode.id)
-						// unpack json
-								.then(result => result.json())
-								.then(result => isWordNotFound(result))
-								.then(result => processNode(result))
-								.then(node => { dispatchState({type: 'SET_SEARCH_NODE', payload: node}); return node; })
-								.then(node => requestAdjecentNodes(node, state, dispatchState))
+				let searchInput = state.searchTerm.toLowerCase();
+				let prevNode = null
+				if(hasMultipleWords(searchInput)){
+						let words = searchInput.replace(/  +/g, ' ').trim().split(' ') 
+						//split words into arrays
+						fetch(API_ENDPOINT + 'path/' +  words[0] + "/" + words[1]) 
+								.then(result => result.json()) // unpack json
+								.then(nodes => isWordNotFound(nodes)) //check if words not found
+								.then(pathNodes => 
+										pathNodes.forEach(pathNode => {  
+												pathNode = processNode(pathNode);
+												if (prevNode === null){
+														dispatchState({
+																type: 'SET_NEW_NODE', 
+																payload: pathNode,
+														})
+												}else{
+														dispatchState({
+																type: 'SET_PATH_NODE', 
+																payload: { 
+																		node: pathNode,
+																		link: { source: prevNode.id, target: pathNode.id }
+																}
+														})
+												}
+												prevNode = pathNode;
+										})
+								)
 								.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
+				}else{ 
+						queryNewWord(searchInput, state, dispatchState);
 				}
+		}
+
+		const hasMultipleWords = (string) => {
+				/* determines qhereteher a string 
+				 * is compossed of multiple words */
+				//remove multiple spaces
+				string = string.replace(/  +/g, ' '); 
+				//trim edges spaces
+				string = string.trim() 
+				return string.indexOf(' ') !== -1
+		}
+		
+
+		const handleToggleDeepLinks = () => {
+				/* hangles the toggle of the deep links, 
+				 * resets the graph if there is already a 
+				 * selected node */
+				let selectedNode = state.selected;
+				if(!state.isEmpty) queryNewWord(selectedNode.id, state, dispatchState);
 				dispatchState({type:'TOGGLE_DEEP_LINKS'});
 		}
+
+
+
 
 		return(
 				<Navbar expand="lg" className="justify-content-center"
@@ -60,7 +91,7 @@ function NavBarContainer({ state, dispatchState }){
 								<h1>Dictographo</h1>
 						</Navbar.Brand>
 						<InputGroup  size='lg' md='auto' className="mx-3" style={{maxWidth: "600px"}} >
-								<FormControl size="lg" as='input' type="text" placeholder="Search" 
+								<FormControl size="lg" as='input' type="text" placeholder="Dog Cat" 
 										value={state.searchTerm} onChange={handleSearchChange} 
 										onKeyPress={event => (event.key === "Enter") && handleSearchSubmit()}/>
 								<InputGroup.Append>

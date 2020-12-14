@@ -43,13 +43,22 @@ const stateReducer = (state, action) =>{
 								nodes: [ ...state.nodes, ...action.payload.nodes ],
 								links: [ ...state.links, ...action.payload.links ]
 						};
-				case 'SET_SEARCH_NODE':
+				case 'SET_NEW_NODE':
 						return {
 								...state,
 								nodes: [ { ...action.payload, selected: true, color: colors.node.selected  } ],
 								links: [],
 								selected: action.payload, // save as selected
 								definedNode: action.payload, // save as a definietion 
+								isEmpty: false,
+						};
+				case 'SET_PATH_NODE':
+						return {
+								...state,
+								nodes: [ ...state.nodes, { ...action.payload.node, selected: true, color: colors.node.selected } ],
+								links: [ ...state.links, { ...action.payload.link, color: colors.node.selected } ],
+								selected: action.payload.node, // save as selected
+								definedNode: action.payload.node, // save as a definietion 
 								isEmpty: false,
 						};
 				case 'SET_NODE_DONE':
