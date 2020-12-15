@@ -23,9 +23,9 @@ function NavBarContainer({ state, dispatchState }){
 				//console.log(state.search) very conviente
 				// set all serches to lowercase
 				let searchInput = state.searchTerm.toLowerCase();
-				let prevNode = null
 				if(hasMultipleWords(searchInput)){
 						let words = searchInput.replace(/  +/g, ' ').trim().split(' ') 
+						let prevNode = null
 						//split words into arrays
 						fetch(API_ENDPOINT + 'path/' +  words[0] + "/" + words[1]) 
 								.then(result => result.json()) // unpack json

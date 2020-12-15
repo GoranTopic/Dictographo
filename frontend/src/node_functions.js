@@ -35,8 +35,7 @@ const queryNewWord = (word, state, dispatchState) => {
 				/* reset the graph state and start a new query into a word, 
 				 * sometime this stymes when it is called a second time,
 				 * this might be because of dispatchState being called twice
-				 * must investigate.
-				 */
+				 * must investigate.  */
 				fetch(API_ENDPOINT + word)
 				// unpack json
 						.then(result => result.json())
@@ -51,17 +50,20 @@ const queryNewWord = (word, state, dispatchState) => {
 
 const requestAdjecentNodes = (node, state, dispatchState) => {
 		/* for every node request the adjecent node to it */
-		 let linkAll = state.isDeepLinks;
+		let linkAll = state.isDeepLinks;
 		// define whether we should link te deeper
 		let graph_type = 'synonyms/';
 		// define which type of graph we are requesting
+		let timeoutWait = 2000;
 		fetch(API_ENDPOINT + graph_type + node.id )
 		// request the synonyms
 				.then(result => result.json())
 				.then(result => isWordNotFound(result))
-				.then(adjNodes => 
-						adjNodes.forEach(adjNode => {  
-								adjNode = processNode(adjNode);
+				.then(adjNodes => adjNodes.forEach(adjNode => {  
+						//for each of the nodes in the list 		
+								adjNode = processNode(adjNode); //process node 
+								setTimeout(timeoutWait); //wait ofr some time 
+								console.log(timeoutWait);
 								if(linkAll || isNewNode(adjNode.id, state)){
 										dispatchState({
 												type: 'SET_NODE_LINK', 
@@ -74,6 +76,7 @@ const requestAdjecentNodes = (node, state, dispatchState) => {
 												}
 										})
 								}
+						timeoutWait = timeoutWait * 40000;
 						})
 				)
 				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
