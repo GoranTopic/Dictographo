@@ -27,9 +27,17 @@ const isNewNode = (nodeId, state) => state.nodes.every( node => node.id !== node
 
 const onClickNode = (nodeId, state, dispatchState) => {
 		// when user clicks on a node
-		requestAdjecentNodes(getNode(nodeId, state), state, dispatchState)
+		queryAdjecentNodes(getNode(nodeId, state), state, dispatchState)
 		dispatchState({type:'SWITCH_SELECTED_NODE', payload: nodeId})  
 };
+
+const timelyDispatch = (dispatchFunc , waitTime=150) => {
+	/* takes a dispachState functions and dispaches it in a 
+	 * random timply fashion this is usefulf for node not to 
+	 * appear all at once in the graph and make it easier on 
+	 * the browser. Returns nothing*/
+		setTimeout(dispatchFunc, waitTime);
+}
 
 const queryNewWord = (word, state, dispatchState) => {
 				/* reset the graph state and start a new query into a word, 
@@ -38,33 +46,34 @@ const queryNewWord = (word, state, dispatchState) => {
 				 * must investigate.  */
 				fetch(API_ENDPOINT + word)
 				// unpack json
-						.then(result => result.json())
-						.then(result => isWordNotFound(result))
-						.then(result => processNode(result))
-						.then(node => { 
+						.then(result => result.json()) //unpack word
+						.then(result => isWordNotFound(result)) //check if word was found
+						.then(result => processNode(result)) //process node
+						.then(node => { //dispatch word
 								dispatchState({type: 'SET_NEW_NODE', payload: node}); 
 								return node; })
-						.then(node => requestAdjecentNodes(node, state, dispatchState))
+						// get the surrounding words
+						.then(node => queryAdjecentNodes(node, state, dispatchState))
 						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 		}
 
-const requestAdjecentNodes = (node, state, dispatchState) => {
+const queryAdjecentNodes = (node, state, dispatchState) => {
 		/* for every node request the adjecent node to it */
 		let linkAll = state.isDeepLinks;
 		// define whether we should link te deeper
 		let graph_type = 'synonyms/';
 		// define which type of graph we are requesting
-		let timeoutWait = 2000;
 		fetch(API_ENDPOINT + graph_type + node.id )
 		// request the synonyms
 				.then(result => result.json())
 				.then(result => isWordNotFound(result))
-				.then(adjNodes => adjNodes.forEach(adjNode => {  
-						//for each of the nodes in the list 		
+				.then(adjNodes => adjNodes.forEach( 
+						// for every node in the array
+						adjNode => timelyDispatch(() => {  
+								//for each of the nodes in the list 		
 								adjNode = processNode(adjNode); //process node 
-								setTimeout(timeoutWait); //wait ofr some time 
-								console.log(timeoutWait);
 								if(linkAll || isNewNode(adjNode.id, state)){
+										// proces is it is new node, or deep link set
 										dispatchState({
 												type: 'SET_NODE_LINK', 
 												payload: { 
@@ -76,14 +85,14 @@ const requestAdjecentNodes = (node, state, dispatchState) => {
 												}
 										})
 								}
-						timeoutWait = timeoutWait * 40000;
 						})
-				)
+						
+				))
 				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
 }
 
 const isWordNotFound = (response, dispatchState) =>{
-		// Set error to state when user search a word not found
+		/* Set error to state when user search a word not found */
 		if( response.detail === "Not found." ) {
 				dispatchState({type: 'SET_WORD_NOT_FOUND'})
 				throw new Error("word not found")
@@ -97,5 +106,5 @@ const onMouseOverNode = function(nodeId, dispatchState) {
 		// need to fund a way to also run the default fuction 
 };
 
-export { processNode, isWordNotFound, queryNewWord, requestAdjecentNodes, onClickNode, onMouseOverNode }
+export { processNode, isWordNotFound, queryNewWord, queryAdjecentNodes, onClickNode, onMouseOverNode }
 

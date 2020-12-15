@@ -1,4 +1,4 @@
-import React  from 'react';
+import React from 'react';
 import { queryNewWord, isWordNotFound, processNode } from '../node_functions';
 import { colors, API_ENDPOINT }  from "../myConfig";
 import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup } from 'react-bootstrap';

@@ -7,12 +7,12 @@ const pathLinkColor = '#17E0E3'
 //const pathLinkColor = '#E41B17'
 
 // function for getting random num
-export const getRandomInt = (max) => {
+const getRandomInt = (max) => {
 		return Math.floor(Math.random() * Math.floor(max))+1 ;
 }
 
 // fuction for getting a random string
-export const getRandomStr = (length) => {
+const getRandomStr = (length) => {
 		var result           = '';
 		var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 		var charactersLength = characters.length;
@@ -21,7 +21,7 @@ export const getRandomStr = (length) => {
 }
 
 //generate random link
-export const getRandomLinks = (link_number, word, nodes) => {
+const getRandomLinks = (link_number, word, nodes) => {
 		var seen_targets = [] 
 		var links = [];
 		for (var i = 0; i < link_number; i++ ){
@@ -35,7 +35,7 @@ export const getRandomLinks = (link_number, word, nodes) => {
 }
 
 // Generate a random node 
-export const genRandomNode = (nodes) => {
+const genRandomNode = (nodes) => {
 		var title = getRandomStr(6);
 		var links = getRandomLinks(getRandomInt(6), title, nodes);
 		return { node:{ id: title }, links };
@@ -43,7 +43,7 @@ export const genRandomNode = (nodes) => {
 
 
 // generate a list of grapth recursibly
-export const genGrapNodes = (word, depth=0, data=[]) =>{
+const genGrapNodes = (word, depth=0, data=[]) =>{
 		for(var i = 0; i < getRandomInt(3); i++){
 				var adjacent_word = getRandomStr(8);
 				data.push({  node:{id: adjacent_word }, links:[{ source: word, target: adjacent_word }] });
@@ -52,7 +52,7 @@ export const genGrapNodes = (word, depth=0, data=[]) =>{
 		return data;
 }
 
-export const makeNewNode = (prevNode, newNode, path=false, selected=false) => {
+const makeNewNode = (prevNode, newNode, path=false, selected=false) => {
 		var nodeColor = (path)? pathNodeColor : (selected)? selectedNodeColor : unselectedNodeColor
 		var linkColor = (path)? pathLinkColor : (selected)? selectedLinkColor : unselectedLinkColor
 				return { 
@@ -62,7 +62,7 @@ export const makeNewNode = (prevNode, newNode, path=false, selected=false) => {
 		};
 
 // Generate a Nodes path from  node to the other
-export const genPath = (start, destination) =>{
+const genPath = (start, destination) =>{
 		let distance  = getRandomInt(10) + 5;
 		let currentNode = start;
 		let data = [];
@@ -82,7 +82,7 @@ export const genPath = (start, destination) =>{
 
 
 // generate a list of grapth recursibly sent them in lists 
-export const genGrapDepth = (word, depth=0, data={ nodes:[], links:[] }) =>{
+const genGrapDepth = (word, depth=0, data={ nodes:[], links:[] }) =>{
 		// Add word to data nodes 
 		data.nodes.push({ id: word });
 		//for word get adjacent words into link data
@@ -99,4 +99,4 @@ export const genGrapDepth = (word, depth=0, data={ nodes:[], links:[] }) =>{
 }
 
 
-
+export { getRandomInt, getRandomStr, getRandomLinks, genRandomNode, genGrapNodes, genPath, genGrapDepth }
