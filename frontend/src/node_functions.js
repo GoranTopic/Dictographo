@@ -32,12 +32,12 @@ const onClickNode = (nodeId, state, dispatchState) => {
 		dispatchState({type:'SWITCH_SELECTED_NODE', payload: nodeId})  
 };
 
-const timelyDispatch = (dispatchFunc , waitTime=25) => {
+const timelyDispatch = (dispatchFunc , waitTime=25, random=200) => {
 	/* takes a dispachState functions and dispaches it in a 
 	 * random timply fashion this is usefulf for node not to 
 	 * appear all at once in the graph and make it easier on 
 	 * the browser. Returns nothing*/
-		setTimeout(dispatchFunc, waitTime + getRandomInt(200));
+		setTimeout(dispatchFunc, waitTime + getRandomInt(random));
 }
 
 const queryNewWord = (word, state, dispatchState) => {
@@ -58,6 +58,44 @@ const queryNewWord = (word, state, dispatchState) => {
 						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 		}
 
+
+const queryPath = ({first, second}, state, dispatchState) => {
+		/* gets passesed a set of two words, 
+		 * queries the server for the path and 
+		 * dispateches the result to state */
+		//split words into arrays
+		fetch(API_ENDPOINT + 'path/' +  first  + "/" + second) 
+				.then(result => result.json()) // unpack json
+				.then(nodes => isWordNotFound(nodes)) //check if words not found
+				.then(pathNodes => 
+						pathNodes.forEach((node, index) => timelyDispatch(() =>{  
+								node = processNode(node);
+								if (index === 0){ 
+										// if this is the first node
+										dispatchState({
+												type: 'SET_NEW_NODE', 
+												payload: node,
+										})
+								}else{
+										//if there is already other nodes
+										console.log(node)
+										console.log(pathNodes[index -1].id)
+										dispatchState({
+												type: 'SET_PATH_NODE', 
+												payload: { 
+														node: node,
+														link: { 
+																source: pathNodes[index -1].id, 
+																target: node.id 
+														}
+												}
+										})
+								}
+						}, 25,0)) //se the time as 25 and the random to 0
+				)
+				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
+
+}
 const queryAdjecentNodes = (node, state, dispatchState) => {
 		/* for every node request the adjecent node to it */
 		let linkAll = state.isDeepLinks;
@@ -107,5 +145,5 @@ const onMouseOverNode = function(nodeId, dispatchState) {
 		// need to fund a way to also run the default fuction 
 };
 
-export { processNode, isWordNotFound, queryNewWord, queryAdjecentNodes, onClickNode, onMouseOverNode }
+export { processNode, isWordNotFound, queryNewWord, queryAdjecentNodes, queryPath, onClickNode, onMouseOverNode }
 

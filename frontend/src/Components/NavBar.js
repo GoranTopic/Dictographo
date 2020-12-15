@@ -1,6 +1,6 @@
 import React from 'react';
-import { queryNewWord, isWordNotFound, processNode } from '../node_functions';
-import { colors, API_ENDPOINT }  from "../myConfig";
+import { queryNewWord, queryPath } from '../node_functions';
+import { colors }  from "../myConfig";
 import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon  } from '@fortawesome/react-fontawesome'
@@ -22,35 +22,15 @@ function NavBarContainer({ state, dispatchState }){
 				/* handle submit search button */
 				//console.log(state.search) very conviente
 				// set all serches to lowercase
+				let words = [] //list of words
+				let setOfWords = {} //set of two words
 				let searchInput = state.searchTerm.toLowerCase();
+				
 				if(hasMultipleWords(searchInput)){
-						let words = searchInput.replace(/  +/g, ' ').trim().split(' ') 
-						let prevNode = null
-						//split words into arrays
-						fetch(API_ENDPOINT + 'path/' +  words[0] + "/" + words[1]) 
-								.then(result => result.json()) // unpack json
-								.then(nodes => isWordNotFound(nodes)) //check if words not found
-								.then(pathNodes => 
-										pathNodes.forEach(pathNode => {  
-												pathNode = processNode(pathNode);
-												if (prevNode === null){
-														dispatchState({
-																type: 'SET_NEW_NODE', 
-																payload: pathNode,
-														})
-												}else{
-														dispatchState({
-																type: 'SET_PATH_NODE', 
-																payload: { 
-																		node: pathNode,
-																		link: { source: prevNode.id, target: pathNode.id }
-																}
-														})
-												}
-												prevNode = pathNode;
-										})
-								)
-								.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
+						words = searchInput.replace(/  +/g, ' ').trim().split(' ') 
+						//trim, remove multiple and seperate by spaces
+						setOfWords = { first: words[0], second: words[1] }
+						queryPath(setOfWords, state, dispatchState);
 				}else{ 
 						queryNewWord(searchInput, state, dispatchState);
 				}
@@ -75,8 +55,6 @@ function NavBarContainer({ state, dispatchState }){
 				if(!state.isEmpty) queryNewWord(selectedNode.id, state, dispatchState);
 				dispatchState({type:'TOGGLE_DEEP_LINKS'});
 		}
-
-
 
 
 		return(
