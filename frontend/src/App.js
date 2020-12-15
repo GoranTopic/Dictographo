@@ -9,7 +9,6 @@ import './App.css';
 
 function App() {
 		/* define dispatcher for the Internal data */
-
 		const [state, dispatchState] = React.useReducer( stateReducer, initial_state );
 
 		return (
@@ -22,8 +21,7 @@ function App() {
 								dispatchState={dispatchState} />
 						{ state.isEmpty? 
 								<CarouselContainer/>
-								:
-								<div style={{display: 'inline',}}>
+								: <div style={{display: 'inline',}}>
 										<SideBarContainer 
 												state={state}
 												dispatchState={dispatchState} />

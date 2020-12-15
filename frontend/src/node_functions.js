@@ -1,4 +1,5 @@
 import { colors, API_ENDPOINT }  from "./myConfig";
+import { getRandomInt }  from "./Components/RandomGenerator";
 
 /*
  * ==================================================
@@ -31,12 +32,12 @@ const onClickNode = (nodeId, state, dispatchState) => {
 		dispatchState({type:'SWITCH_SELECTED_NODE', payload: nodeId})  
 };
 
-const timelyDispatch = (dispatchFunc , waitTime=150) => {
+const timelyDispatch = (dispatchFunc , waitTime=25) => {
 	/* takes a dispachState functions and dispaches it in a 
 	 * random timply fashion this is usefulf for node not to 
 	 * appear all at once in the graph and make it easier on 
 	 * the browser. Returns nothing*/
-		setTimeout(dispatchFunc, waitTime);
+		setTimeout(dispatchFunc, waitTime + getRandomInt(200));
 }
 
 const queryNewWord = (word, state, dispatchState) => {
