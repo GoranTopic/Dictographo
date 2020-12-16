@@ -32,7 +32,7 @@ const onClickNode = (nodeId, state, dispatchState) => {
 		dispatchState({type:'SWITCH_SELECTED_NODE', payload: nodeId})  
 };
 
-const timelyDispatch = (dispatchFunc , waitTime=25, random=200) => {
+const timelyDispatch = (dispatchFunc , waitTime=0, random=10) => {
 	/* takes a dispachState functions and dispaches it in a 
 	 * random timply fashion this is usefulf for node not to 
 	 * appear all at once in the graph and make it easier on 
@@ -41,60 +41,72 @@ const timelyDispatch = (dispatchFunc , waitTime=25, random=200) => {
 }
 
 const queryNewWord = (word, state, dispatchState) => {
-				/* reset the graph state and start a new query into a word, 
-				 * sometime this stymes when it is called a second time,
-				 * this might be because of dispatchState being called twice
-				 * must investigate.  */
-				fetch(API_ENDPOINT + word)
-				// unpack json
-						.then(result => result.json()) //unpack word
-						.then(result => isWordNotFound(result)) //check if word was found
-						.then(result => processNode(result)) //process node
-						.then(node => { //dispatch word
-								dispatchState({type: 'SET_NEW_NODE', payload: node}); 
-								return node; })
-						// get the surrounding words
-						.then(node => queryAdjecentNodes(node, state, dispatchState))
-						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
-		}
+		/* reset the graph state and start a new query into a word, 
+		 * sometime this stymes when it is called a second time,
+		 * this might be because of dispatchState being called twice
+		 * must investigate.  */
+		fetch(API_ENDPOINT + word)
+		// unpack json
+				.then(result => result.json()) //unpack word
+				.then(result => isWordNotFound(result)) //check if word was found
+				.then(result => processNode(result)) //process node
+				.then(node => { //dispatch word
+						dispatchState({
+								type: 'SET_NEW_NODE', 
+								payload: node
+						}); 
+						return node; })
+		// get the surrounding words
+				.then(node => queryAdjecentNodes(node, state, dispatchState))
+				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
+}
 
 
-const queryPath = ({first, second}, state, dispatchState) => {
+const queryPath = (words, state, dispatchState) => {
 		/* gets passesed a set of two words, 
 		 * queries the server for the path and 
 		 * dispateches the result to state */
 		//split words into arrays
-		fetch(API_ENDPOINT + 'path/' +  first  + "/" + second) 
-				.then(result => result.json()) // unpack json
-				.then(nodes => isWordNotFound(nodes)) //check if words not found
-				.then(pathNodes => 
-						pathNodes.forEach((node, index) => timelyDispatch(() =>{  
-								node = processNode(node);
-								if (index === 0){ 
-										// if this is the first node
-										dispatchState({
-												type: 'SET_NEW_NODE', 
-												payload: node,
-										})
-								}else{
-										//if there is already other nodes
-										console.log(node)
-										console.log(pathNodes[index -1].id)
-										dispatchState({
-												type: 'SET_PATH_NODE', 
-												payload: { 
-														node: node,
-														link: { 
-																source: pathNodes[index -1].id, 
-																target: node.id 
+		let prevNode = null;
+		let first;
+		let second;
+		for( var i = 0; i <= words.length; i++){
+				console.log(i)
+				console.log(first);
+				console.log(second);
+				first = words[i];
+				second = words[i + 1];
+				fetch(API_ENDPOINT + 'path/' +  first  + "/" + second) 
+						.then(result => result.json()) // unpack json
+						.then(nodes => isWordNotFound(nodes)) //check if words not found
+						.then(pathNodes => 
+								pathNodes.forEach((node, index) => timelyDispatch(() =>{  
+										node = processNode(node);
+										if (prevNode === null){ 
+												// if this is the first node
+												dispatchState({
+														type: 'SET_NEW_NODE', 
+														payload: node,
+												})
+										}else{
+												//if there is already other nodes
+												dispatchState({
+														type: 'SET_PATH_NODE', 
+														payload: { 
+																node: node,
+																link: { 
+																		source: prevNode.id, 
+																		target: node.id 
+																}
 														}
-												}
-										})
-								}
-						}, 25,0)) //se the time as 25 and the random to 0
-				)
-				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
-
+												})
+										}
+										prevNode = node;
+								}, 25,0)
+								) //se the time as 25 and the random to 0
+						)
+						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
+		}
 }
 const queryAdjecentNodes = (node, state, dispatchState) => {
 		/* for every node request the adjecent node to it */
@@ -123,6 +135,7 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 														}
 												}
 										})
+
 								}
 						})
 						

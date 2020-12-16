@@ -16,34 +16,29 @@ import { faSlidersH } from '@fortawesome/free-solid-svg-icons'
 function NavBarContainer({ state, dispatchState }){
 
 		// handle the change by seting the state variable to 
-		const handleSearchChange = change => dispatchState({ type: 'SET_SEARCH_TERM', payload: change.target.value });
+		const handleSearchChange = change => dispatchState({ 
+				type: 'SET_SEARCH_TERM',
+				payload: change.target.value });
 
 		const handleSearchSubmit = () =>  {
 				/* handle submit search button */
-				//console.log(state.search) very conviente
+				let words = getmultipleWords(state.searchTerm.toLowerCase());
 				// set all serches to lowercase
-				let words = [] //list of words
-				let setOfWords = {} //set of two words
-				let searchInput = state.searchTerm.toLowerCase();
-				
-				if(hasMultipleWords(searchInput)){
-						words = searchInput.replace(/  +/g, ' ').trim().split(' ') 
-						//trim, remove multiple and seperate by spaces
-						setOfWords = { first: words[0], second: words[1] }
-						queryPath(setOfWords, state, dispatchState);
+				if(words.length > 1){
+						//if it has more that two words
+						queryPath(words, state, dispatchState);
 				}else{ 
-						queryNewWord(searchInput, state, dispatchState);
+						// if there is only one word
+						queryNewWord(words[0], state, dispatchState);
 				}
 		}
 
-		const hasMultipleWords = (string) => {
+		const getmultipleWords = (string) => {
 				/* determines qhereteher a string 
 				 * is compossed of multiple words */
 				//remove multiple spaces
-				string = string.replace(/  +/g, ' '); 
-				//trim edges spaces
-				string = string.trim() 
-				return string.indexOf(' ') !== -1
+				//trim, remove multiple and seperate by spaces
+				return string.replace(/  +/g, ' ').trim().split(' ') 
 		}
 		
 
