@@ -62,18 +62,18 @@ const queryNewWord = (word, state, dispatchState) => {
 }
 
 
-const queryPath = (words, state, dispatchState) => {
+const queryPath = (words, state, dispatchState, prevNode=null) => {
 		/* gets passesed a set of two words, 
 		 * queries the server for the path and 
 		 * dispateches the result to state */
 		//split words into arrays
-		let prevNode = null;
 		let first;
 		let second;
-		for( var i = 0; i + 1 < words.length; i++){
-				console.log(i)
+		for( var i = 0; i+1 <= words.length-1; i++){
 				first = words[i];
 				second = words[i + 1];
+				console.log(words)
+				console.log(i)
 				console.log(first);
 				console.log(second);
 				fetch(API_ENDPOINT + 'path/' +  first  + "/" + second) 
@@ -102,7 +102,7 @@ const queryPath = (words, state, dispatchState) => {
 												})
 										}
 										prevNode = node;
-								}, 25,0)
+								}, 300,0)
 								) //se the time as 25 and the random to 0
 						)
 						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
