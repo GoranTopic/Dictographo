@@ -70,12 +70,12 @@ const queryPath = (words, state, dispatchState) => {
 		let prevNode = null;
 		let first;
 		let second;
-		for( var i = 0; i <= words.length; i++){
+		for( var i = 0; i + 1 < words.length; i++){
 				console.log(i)
-				console.log(first);
-				console.log(second);
 				first = words[i];
 				second = words[i + 1];
+				console.log(first);
+				console.log(second);
 				fetch(API_ENDPOINT + 'path/' +  first  + "/" + second) 
 						.then(result => result.json()) // unpack json
 						.then(nodes => isWordNotFound(nodes)) //check if words not found
