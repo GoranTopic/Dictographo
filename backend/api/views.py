@@ -1,5 +1,5 @@
 from .models import Word, Definition, Example, Synonym_Relation
-from .serializers import WordSerializer, QuerySearchSerializer, CharFieldSerializer
+from .serializers import WordSerializer, QuerySearchSerializer, CharFieldSerializer, ErrorMsgSerializer
 from .permissions import IsAuthorOrReadOnly
 from .apps import ApiConfig
 from rest_framework import generics
@@ -20,13 +20,33 @@ class NeighborsDetail(generics.ListAPIView):
     serializer_class = WordSerializer
     permission_classes = (IsAuthorOrReadOnly,)
     
-    def not_found_msg(self, word):
+    def jsonNotFoundMsg(self, words=None, detail = "Not Found.", first=None, last=None ):
         '''returns a dict with the not found word'''
-        not_found ={ 
+        if isinstance(words, list): 
+            multiple = True
+            message = []
+            for word in words:
+                message.append({ # not found dict
                     'w_id': word, 
-                    'detail':"Not Found."
+                    'detail': detail,
+                    'first': first,
+                    'last': last,})
+        else:
+            word = words # there is only one word
+            multiple = False
+            message = { # not found dict
+                    'w_id': word, 
+                    'detail': detail,
+                    'first': first,
+                    'last': last,
                     }
-        return not_found
+
+        serializer = ErrorMsgSerializer(message, many=multiple)
+        # tranfer as json 
+        json = JSONRenderer().render(serializer.data)
+        # send json data back, must have safe parameter as False
+        return JsonResponse(serializer.data,safe=False)
+        
 
     def query_neighbors(self, word):
         '''return a list of neiboring word form a given word'''
@@ -43,10 +63,10 @@ class NeighborsDetail(generics.ListAPIView):
         word_list = []
         if not Word.objects.filter(w_id=word).exists():
             # if word does not exist in db 
-            word_list.append(self.not_found_msg(word))
+            return self.jsonNotFoundMsg(word)
         else:
             # if the word is in the db
-            # get word form the db and appedn to the list of words
+            # get word form the db and append to the list of words
             #word_list.append(self.get_queryset().get(w_id=word))
             # query neighbors and append neighboring words too =)
             [word_list.append(word) for word in self.query_neighbors(kwargs['pk'])]
@@ -65,29 +85,25 @@ class PathDetail(generics.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         ''' get a word and return a list of the json with requested word and neiboring words '''
-        not_found_msg = NeighborsDetail.not_found_msg
+        jsonNotFoundMsg = NeighborsDetail.jsonNotFoundMsg
         query_neighbors = NeighborsDetail.query_neighbors
         first_word = kwargs['pk']
         second_word = kwargs['second_pk']
         word_list = [] 
-
         if not Word.objects.filter(w_id=first_word).exists():
             # if the first word is not in db
-            word_list.append(not_found_msg(self, first_word))
             if not Word.objects.filter(w_id=second_word).exists():
                 # if second and first is not in db
-                word_list.append(not_found_msg(self, second_word))
-            #else:
-                # if second word is in in db
-                #word_list.append(self.get_queryset().get(w_id=second_word))
-                #[word_list.append(word) for word in query_neighbors(self, second_word)]
+                # send both as not founs
+                return jsonNotFoundMsg(self, [first_word, second_word])
+            # send only first word not found
+            return jsonNotFoundMsg(self, first_word)
         else:
             # if first is in db
             if not Word.objects.filter(w_id=second_word).exists():
                 # but second word is not im db
-                word_list.append(not_found_msg(self, second_word))
-                #word_list.append(self.get_queryset().get(w_id=first_word))
-                #[word_list.append(word) for word in NeighborsDetail.query_neighbors(self, first_word)]
+                # return second word not found
+                return jsonNotFoundMsg(self, second_word)
             else:
                 # if both words are in the db
                 # get words from the db
@@ -97,17 +113,10 @@ class PathDetail(generics.ListAPIView):
                 if(nx.has_path(self.synonym_graph, source_word, target_word)):
                     # get the shortest path
                     word_list = nx.shortest_path(self.synonym_graph, source_word, target_word) 
-                    #if word_list[0] is not source_word: word_list.insert(0, source_word)
-                    #if word_list[-1] is not target_word: word_list.append(target_word)
                 else:
+                    # if the path does not exists
                     # append both neibors to the result
-                    #[word_list.append(word) for word in NeighborsDetail.query_neighbors(self, first_word)]
-                    #[word_list.append(word) for word in NeighborsDetail.query_neighbors(self, second_word)]
-                    word_list.append({ 'w_id':  None,
-                        'detail':'Path not found.',
-                        'first': first_word,
-                        'first': second_word, 
-                        })
+                    return jsonNotFoundMsg(self,detail ='Path not found.', first=first_word, last=second_word)
 
         # pass the word list thru the serilizer with parameter many 
         serializer = self.get_serializer(word_list, many=True)

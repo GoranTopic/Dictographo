@@ -17,6 +17,7 @@ class ExampleSerializer(serializers.ModelSerializer):
         model = Example
         fields = ('example',)
 
+
 class WordSerializer(serializers.ModelSerializer):
     examples = ExampleSerializer(read_only=True, many=True) 
     definitions = DefinitionSerializer(read_only=True, many=True) 
@@ -26,9 +27,16 @@ class WordSerializer(serializers.ModelSerializer):
         fields = ( 'w_id', 'word', 'etymology', 'notes', 'examples', 'definitions', 'synonyms')
 
 class CharFieldSerializer(serializers.Serializer):
+    # used for the query serializer and error serializer
     char_field = serializers.CharField(max_length=100)
-
 
 class QuerySearchSerializer(serializers.Serializer):
     w_id = serializers.CharField(max_length=100)
     word = serializers.CharField(max_length=100)
+    
+class ErrorMsgSerializer(serializers.ModelSerializer):
+    # serilaixer for error messages 
+    w_id = serializers.CharField(max_length=100)
+    detail = serializers.CharField(max_length=100)
+    first = serializers.CharField(max_length=100)
+    last = serializers.CharField(max_length=100)
