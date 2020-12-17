@@ -24,7 +24,7 @@ class NeighborsDetail(generics.ListAPIView):
         '''returns a dict with the not found word'''
         not_found ={ 
                     'w_id': word, 
-                    'detail':'not found' 
+                    'detail':"Not Found."
                     }
         return not_found
 
@@ -77,17 +77,17 @@ class PathDetail(generics.ListAPIView):
             if not Word.objects.filter(w_id=second_word).exists():
                 # if second and first is not in db
                 word_list.append(not_found_msg(self, second_word))
-            else:
+            #else:
                 # if second word is in in db
-                word_list.append(self.get_queryset().get(w_id=second_word))
-                [word_list.append(word) for word in query_neighbors(self, second_word)]
+                #word_list.append(self.get_queryset().get(w_id=second_word))
+                #[word_list.append(word) for word in query_neighbors(self, second_word)]
         else:
             # if first is in db
             if not Word.objects.filter(w_id=second_word).exists():
                 # but second word is not im db
                 word_list.append(not_found_msg(self, second_word))
-                word_list.append(self.get_queryset().get(w_id=first_word))
-                [word_list.append(word) for word in NeighborsDetail.query_neighbors(self, first_word)]
+                #word_list.append(self.get_queryset().get(w_id=first_word))
+                #[word_list.append(word) for word in NeighborsDetail.query_neighbors(self, first_word)]
             else:
                 # if both words are in the db
                 # get words from the db
@@ -103,7 +103,7 @@ class PathDetail(generics.ListAPIView):
                     # append both neibors to the result
                     #[word_list.append(word) for word in NeighborsDetail.query_neighbors(self, first_word)]
                     #[word_list.append(word) for word in NeighborsDetail.query_neighbors(self, second_word)]
-                    word_list.append({ 'w_id':  None, 'detail':'path not found' })
+                    word_list.append({ 'w_id':  None, 'detail':'Path not found.' })
 
         # pass the word list thru the serilizer with parameter many 
         serializer = self.get_serializer(word_list, many=True)

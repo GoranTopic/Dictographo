@@ -48,7 +48,7 @@ const queryNewWord = (word, state, dispatchState) => {
 		fetch(API_ENDPOINT + word)
 		// unpack json
 				.then(result => result.json()) //unpack word
-				.then(result => isWordNotFound(result)) //check if word was found
+				.then(result => catchError(result)) //check if word was found
 				.then(result => processNode(result)) //process node
 				.then(node => { //dispatch word
 						dispatchState({
@@ -61,50 +61,56 @@ const queryNewWord = (word, state, dispatchState) => {
 				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 }
 
-
-const queryPath = (words, state, dispatchState, prevNode=null) => {
+const queryPath = (words, state, dispatchState) => {
 		/* gets passesed a set of two words, 
 		 * queries the server for the path and 
 		 * dispateches the result to state */
 		//split words into arrays
+		let prevNode = null;
 		let first;
 		let second;
 		for( var i = 0; i+1 <= words.length-1; i++){
 				first = words[i];
 				second = words[i + 1];
-				console.log(words)
-				console.log(i)
-				console.log(first);
-				console.log(second);
+				//console.log(words)
+				//console.log(i)
+				//console.log(first);
+				//console.log(second);
 				fetch(API_ENDPOINT + 'path/' +  first  + "/" + second) 
 						.then(result => result.json()) // unpack json
-						.then(nodes => isWordNotFound(nodes)) //check if words not found
-						.then(pathNodes => 
-								pathNodes.forEach((node, index) => timelyDispatch(() =>{  
-										node = processNode(node);
-										if (prevNode === null){ 
-												// if this is the first node
-												dispatchState({
-														type: 'SET_NEW_NODE', 
-														payload: node,
-												})
-										}else{
-												//if there is already other nodes
-												dispatchState({
-														type: 'SET_PATH_NODE', 
-														payload: { 
-																node: node,
-																link: { 
-																		source: prevNode.id, 
-																		target: node.id 
+						.then(nodes => catchError(nodes)) //check if words not found
+						.then(pathNodes => {
+								//console.log(pathNodes)
+								pathNodes.forEach((node, index) => 
+										timelyDispatch(() => {  
+												node = processNode(node);
+												if (prevNode === null){ 
+														// if this is the first node
+														dispatchState({
+																type: 'SET_NEW_NODE', 
+																payload: node,
+														})
+												}else{
+														//console.log(prevNode.id)
+														//console.log(" --> ")
+														//console.log(node.id)
+														//console.log("\n")
+														//if there is already other nodes
+														dispatchState({
+																type: 'SET_PATH_NODE', 
+																payload: { 
+																		node: node,
+																		link: { 
+																				source: prevNode.id, 
+																				target: node.id 
+																		}
 																}
-														}
-												})
-										}
-										prevNode = node;
-								}, 300,0)
+														})
+												}
+												prevNode = node;
+										}, 25,0)
 								) //se the time as 25 and the random to 0
-						)
+						})
 						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 		}
 }
@@ -117,7 +123,7 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 		fetch(API_ENDPOINT + graph_type + node.id )
 		// request the synonyms
 				.then(result => result.json())
-				.then(result => isWordNotFound(result))
+				.then(result => catchError(result))
 				.then(adjNodes => adjNodes.forEach( 
 						// for every node in the array
 						adjNode => timelyDispatch(() => {  
@@ -143,13 +149,36 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
 }
 
-const isWordNotFound = (response, dispatchState) =>{
+const catchError = (response, dispatchState) =>{
 		/* Set error to state when user search a word not found */
-		if( response.detail === "Not found." ) {
-				dispatchState({type: 'SET_WORD_NOT_FOUND'})
-				throw new Error("word not found")
+		if(response instanceof Array){
+				// if it has the response for many words
+				response.forEach((response, index, responses) => {
+						if(response.detail === "Not Found."){
+								dispatchState({
+										type: 'SET_WORD_NOT_FOUND', 
+										payload: response.w_id})
+								responses.splice(index, 1); // remove from the list
+						}
+				})
+				return response;
 		}else{
-				return response
+				// if it only one elment
+				if(response.detail === "Not found.") {
+						console.log("word was not found")
+						dispatchState({
+										type: 'SET_WORD_NOT_FOUND', 
+										payload: response.w_id})
+						throw new Error("word not found");
+				}else if(response.detail === "Path not found."){
+						console.log("path was not foumd")
+						dispatchState({
+										type: 'SET_PATH_NOT_FOUND', 
+										path: response.w_id})
+						throw new Error("path not found");
+				}else{
+						return response
+				}
 		}
 }
 
@@ -158,5 +187,5 @@ const onMouseOverNode = function(nodeId, dispatchState) {
 		// need to fund a way to also run the default fuction 
 };
 
-export { processNode, isWordNotFound, queryNewWord, queryAdjecentNodes, queryPath, onClickNode, onMouseOverNode }
+export { processNode, catchError, queryNewWord, queryAdjecentNodes, queryPath, onClickNode, onMouseOverNode }
 
