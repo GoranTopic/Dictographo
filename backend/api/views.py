@@ -23,6 +23,7 @@ class NeighborsDetail(generics.ListAPIView):
     def jsonNotFoundMsg(self, words=None, detail = "Not Found.", first=None, last=None ):
         '''returns a dict with the not found word'''
         if isinstance(words, list): 
+            print("two not found words")
             multiple = True
             message = []
             for word in words:
@@ -43,8 +44,6 @@ class NeighborsDetail(generics.ListAPIView):
 
         serializer = ErrorMsgSerializer(message, many=multiple)
         # tranfer as json 
-        json = JSONRenderer().render(serializer.data)
-        # send json data back, must have safe parameter as False
         return JsonResponse(serializer.data,safe=False)
         
 
@@ -94,7 +93,7 @@ class PathDetail(generics.ListAPIView):
             # if the first word is not in db
             if not Word.objects.filter(w_id=second_word).exists():
                 # if second and first is not in db
-                # send both as not founs
+                # send both as not founds
                 return jsonNotFoundMsg(self, [first_word, second_word])
             # send only first word not found
             return jsonNotFoundMsg(self, first_word)

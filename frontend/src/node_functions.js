@@ -72,7 +72,7 @@ const queryPath = (words, state, dispatchState) => {
 		for( var i = 0; i+1 <= words.length-1; i++){
 				first = words[i];
 				second = words[i + 1];
-				//console.log(words)
+				console.log(words)
 				//console.log(i)
 				//console.log(first);
 				//console.log(second);
@@ -81,7 +81,7 @@ const queryPath = (words, state, dispatchState) => {
 						.then(nodes => catchError(nodes, state, dispatchState)) 
 							//check if words not found
 						.then(pathNodes => {
-								//console.log(pathNodes)
+								console.log(pathNodes)
 								pathNodes.forEach((node, index) => 
 										timelyDispatch(() => {  
 												node = processNode(node);
@@ -153,21 +153,20 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 const catchError = (response, state, dispatchState) =>{
 		/* Set error to state when user search a word not found */
 		if(response instanceof Array){
+				console.log("words was not found")
+				console.log(response)
 				// if it has the response for many words
-				response.forEach((response, index, responses) => {
-						if(response.detail === "Not Found."){
+				response.forEach((msg, index, msgs) => {
+						if(msg.detail === "Not Found."){
 								dispatchState({
 										type: 'SET_WORD_NOT_FOUND', 
-										payload: response.w_id})
-								responses.splice(index, 1); // remove from the list
+										payload: msg.w_id})
+								msgs.splice(index, 1); // remove from the list
 						}
 				})
-				return response;
-		}else{
-				// if it only one elment
+				throw new Error("word not found");
+		}else{ // if it only one elment
 				if(response.detail === "Not found.") {
-						console.log("word was not found")
-						console.log(response)
 						dispatchState({
 										type: 'SET_WORD_NOT_FOUND', 
 										payload: state.searchTerm})
