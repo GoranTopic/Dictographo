@@ -67,19 +67,24 @@ const queryPath = async (words, state, dispatchState) => {
 		 * dispateches the result to state */
 		//split words into arrays
 		//let path;
-		let first;
-		let second;
-		for( var i = 0; i+1 <= words.length-1; i++){
-				first = words[i];
-				second = words[i+1];
-				//for every node in the array get two by two
-			let request = await fetch(API_ENDPOINT + 'path/' +  first  + "/" + second)
-						.catch(err => dispatchState({type:'SET_FETCH_FAILED'}));
-			let result = await request.json(); // unpack json
-			console.log(result);
-				//console.log(nodes)
-				//.then(nodes => catchError(nodes, state, dispatchState)) 	
+		try {
+				let first;
+				let second;
+				for( var i = 0; i+1 <= words.length-1; i++){
+						first = words[i];
+						second = words[i+1];
+						//for every node in the array get two by two
+						let request = await fetch(API_ENDPOINT + 'path/' +  first  + "/" + second)
+								.catch(err => { dispatchState({type:'SET_FETCH_FAILED'}); });
+						let result = await request.json(); // unpack json
+						console.log(result);
+						//console.log(nodes)
+						//.then(nodes => catchError(nodes, state, dispatchState)) 	
+				}
+		} catch (error) {
+				console.error(error);
 		}
+				
 		/*
 		console.log("this ran")
 		let prevNode = null;
