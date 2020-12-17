@@ -10,6 +10,7 @@ const initial_state = {
 		isWordNotFound: false,
 		wordsNotFound: [],
 		isPathNotFound: false,
+		pathsNotFound: [],
 		isEmpty: true,
 		isLoading: true,
 		searchTerm: '',
@@ -124,12 +125,14 @@ const stateReducer = (state, action) =>{
 						return {
 								...state,
 								isWordNotFound: true,
-								wordsNotFound: [ ...state.wordsNotFound, action.payload], // add not found wors to list
+								// add not found wors to list
+								wordsNotFound: [ ...state.wordsNotFound, action.payload],
 						};
 				case 'SET_PATH_NOT_FOUND':
 						return {
 								...state,
 								isPathNotFound: true,
+								pathsNotFound:  [ ...state.pathsNotFound, action.payload]
 						};
 				case 'DISSMISS_ERROR':
 						return {
@@ -138,6 +141,7 @@ const stateReducer = (state, action) =>{
 								isWordNotFound: false,
 								wordsNotFound: [],
 								isPathNotFound: false,
+								pathsNotFound:  [],
 						};
 				case 'TOGGLE_DEEP_LINKS':
 						return {

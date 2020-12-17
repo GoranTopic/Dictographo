@@ -21,9 +21,10 @@ function AlertContainer({state, dispatchState}) {
 								{ state.wordsNotFound.map(word => <i>"{word},"</i> ) }
 						</b>in our dictionary yet.</p> : <></>}
 						{state.isPathNotFound? //if there is a path not found
-						<p>Looks like <b> 
-								{ state.wordsNotFound.map(word => <i>"{word},"</i> ) }
-						</b>in our dictionary yet.</p> : <></> }
+						<p>Looks like there is no path between: <b> 
+								{ state.pathsNotFound.map(
+										path => <i>"{path.first}, {path.last}"</i> ) }
+						</b></p> : <></> }
 						}
 				</Alert>
 
