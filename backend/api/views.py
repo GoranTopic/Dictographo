@@ -103,7 +103,11 @@ class PathDetail(generics.ListAPIView):
                     # append both neibors to the result
                     #[word_list.append(word) for word in NeighborsDetail.query_neighbors(self, first_word)]
                     #[word_list.append(word) for word in NeighborsDetail.query_neighbors(self, second_word)]
-                    word_list.append({ 'w_id':  None, 'detail':'Path not found.' })
+                    word_list.append({ 'w_id':  None,
+                        'detail':'Path not found.',
+                        'first': first_word,
+                        'first': second_word, 
+                        })
 
         # pass the word list thru the serilizer with parameter many 
         serializer = self.get_serializer(word_list, many=True)
