@@ -18,13 +18,13 @@ function AlertContainer({state, dispatchState}) {
 								<Alert.Heading>Oh Snap!</Alert.Heading>
 								{state.isWordNotFound? //if the there is not words found
 								<p>Looks like <b>
-										{ state.wordsNotFound.map(word => <i>"{word},"</i> ) }
+										{ [...state.wordsNotFound].map(word => <i>{word}, </i> ) }
 								</b>in our dictionary yet.</p> : <></>}
 								{state.isPathNotFound? //if there is a path not found
-								<p>Looks like there is no path between: <b> 
-										{ state.pathsNotFound.map(
-												path => <i>"{path.first}, {path.last}"</i> ) }
-								</b></p> : <></> }
+								<p>Looks like there is no path between:
+										{ [...state.pathsNotFound].map(
+												path => <i><b>{path.first}</b> and <b>{path.last}</b></i> ) }
+								</p> : <></> }
 						</Alert>)
 		}else{
 				return <></>

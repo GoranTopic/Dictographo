@@ -124,15 +124,16 @@ const stateReducer = (state, action) =>{
 				case 'SET_WORD_NOT_FOUND':
 						return {
 								...state,
+								isError: true,
 								isWordNotFound: true,
 								// add not found wors to list
-								wordsNotFound: [ ...state.wordsNotFound, action.payload],
+								wordsNotFound: new Set([ ...state.wordsNotFound, action.payload]),
 						};
 				case 'SET_PATH_NOT_FOUND':
 						return {
 								...state,
 								isPathNotFound: true,
-								pathsNotFound:  [ ...state.pathsNotFound, action.payload]
+								pathsNotFound: new Set([ ...state.pathsNotFound, action.payload]),
 						};
 				case 'DISSMISS_ERROR':
 						return {

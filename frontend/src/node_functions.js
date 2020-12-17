@@ -66,22 +66,24 @@ const queryPath = (words, state, dispatchState) => {
 		 * queries the server for the path and 
 		 * dispateches the result to state */
 		//split words into arrays
+		console.log("this ran")
 		let prevNode = null;
 		let first;
 		let second;
 		for( var i = 0; i+1 <= words.length-1; i++){
 				first = words[i];
 				second = words[i + 1];
-				console.log(words)
+				//console.log(words)
 				//console.log(i)
-				//console.log(first);
-				//console.log(second);
+				console.log(first);
+				console.log(second);
 				fetch(API_ENDPOINT + 'path/' +  first  + "/" + second) 
 						.then(result => result.json()) // unpack json
+						.then(nodes => {console.log(nodes); return nodes })
 						.then(nodes => catchError(nodes, state, dispatchState)) 
 							//check if words not found
 						.then(pathNodes => {
-								console.log(pathNodes)
+								//console.log(pathNodes)
 								pathNodes.forEach((node, index) => 
 										timelyDispatch(() => {  
 												node = processNode(node);
@@ -92,10 +94,10 @@ const queryPath = (words, state, dispatchState) => {
 																payload: node,
 														})
 												}else{
-														//console.log(prevNode.id)
-														//console.log(" --> ")
-														//console.log(node.id)
-														//console.log("\n")
+														console.log(prevNode.id)
+														console.log(" --> ")
+														console.log(node.id)
+														console.log("\n")
 														//if there is already other nodes
 														dispatchState({
 																type: 'SET_PATH_NODE', 
@@ -115,6 +117,8 @@ const queryPath = (words, state, dispatchState) => {
 						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 		}
 }
+
+
 const queryAdjecentNodes = (node, state, dispatchState) => {
 		/* for every node request the adjecent node to it */
 		let linkAll = state.isDeepLinks;
@@ -152,30 +156,34 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 
 const catchError = (response, state, dispatchState) =>{
 		/* Set error to state when user search a word not found */
+		//console.log("got to cath error:")
+		//console.log(response)
 		if(response instanceof Array){
-				console.log("words was not found")
-				console.log(response)
+				let foundWords = []
+				//console.log("words was not found")
 				// if it has the response for many words
-				response.forEach((msg, index, msgs) => {
-						if(msg.detail === "Not Found."){
+				response.forEach((word, index, words) => {
+						if(word.detail === "Not Found."){
 								dispatchState({
 										type: 'SET_WORD_NOT_FOUND', 
-										payload: msg.w_id})
-								msgs.splice(index, 1); // remove from the list
+										payload: word.w_id});
+						}else{
+								foundWords.push(word);
 						}
 				})
-				throw new Error("word not found");
+				return foundWords;
 		}else{ // if it only one elment
+				//console.log("got word:")
 				if(response.detail === "Not found.") {
 						dispatchState({
-										type: 'SET_WORD_NOT_FOUND', 
-										payload: state.searchTerm})
+								type: 'SET_WORD_NOT_FOUND', 
+								payload: state.searchTerm});
 						throw new Error("word not found");
 				}else if(response.detail === "Path not found."){
 						// if the error is path not found
-						console.log("path was not found")
+						//console.log("path was not found")
 						dispatchState({
-										type: 'SET_PATH_NOT_FOUND', 
+								type: 'SET_PATH_NOT_FOUND', 
 								payload: { 
 										'first': response.first,
 										'last': response.last,
