@@ -20,11 +20,13 @@ function AlertContainer({state, dispatchState}) {
 								<p>Looks like <b>
 										{ [...state.wordsNotFound].map(word => <i>{word}, </i> ) }
 								</b>in our dictionary yet.</p> : <></>}
-								{state.isPathNotFound? //if there is a path not found
-								<p>Looks like there is no path between:
-										{ [...state.pathsNotFound].map(
+								{state.ispathnotfound? //if there is a path not found
+								<p>looks like there is no path between:
+										{ [...state.pathsnotfound].map(
 												path => <i><b>{path.first}</b> and <b>{path.last}</b></i> ) }
 								</p> : <></> }
+								{state.isFetchFailed? //There is a problem with the network
+								<p>Could not connect to server.</p> : <></> }
 						</Alert>)
 		}else{
 				return <></>

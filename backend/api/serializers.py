@@ -41,3 +41,4 @@ class ErrorMsgSerializer(serializers.Serializer):
     first = serializers.CharField(max_length=100)
     last = serializers.CharField(max_length=100)
 
+

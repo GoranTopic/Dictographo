@@ -61,15 +61,31 @@ const queryNewWord = (word, state, dispatchState) => {
 				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 }
 
-const queryPath = (words, state, dispatchState) => {
+const queryPath = async (words, state, dispatchState) => {
 		/* gets passesed a set of two words, 
 		 * queries the server for the path and 
 		 * dispateches the result to state */
 		//split words into arrays
+		//let path;
+		let first;
+		let second;
+		for( var i = 0; i+1 <= words.length-1; i++){
+				first = words[i];
+				second = words[i+1];
+				//for every node in the array get two by two
+			let request = await fetch(API_ENDPOINT + 'path/' +  first  + "/" + second)
+						.catch(err => dispatchState({type:'SET_FETCH_FAILED'}));
+			let result = await request.json(); // unpack json
+			console.log(result);
+				//console.log(nodes)
+				//.then(nodes => catchError(nodes, state, dispatchState)) 	
+		}
+		/*
 		console.log("this ran")
 		let prevNode = null;
 		let first;
 		let second;
+
 		for( var i = 0; i+1 <= words.length-1; i++){
 				first = words[i];
 				second = words[i + 1];
@@ -116,6 +132,7 @@ const queryPath = (words, state, dispatchState) => {
 						})
 						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 		}
+		*/
 }
 
 

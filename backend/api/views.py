@@ -23,7 +23,6 @@ class NeighborsDetail(generics.ListAPIView):
     def jsonNotFoundMsg(self, words=None, detail = "Not Found.", first=None, last=None ):
         '''returns a dict with the not found word'''
         if isinstance(words, list): 
-            print("two not found words")
             multiple = True
             message = []
             for word in words:

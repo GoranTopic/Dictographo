@@ -7,6 +7,7 @@ const initial_state = {
 		selected:{},
 		definedNode:{},
 		isError: false,
+		isFetchFailed: false,
 		isWordNotFound: false,
 		wordsNotFound: [],
 		isPathNotFound: false,
@@ -158,6 +159,7 @@ const stateReducer = (state, action) =>{
 						return {
 								...state,
 								isError: true,
+								isFetchFailed: true,
 						};
 				default:
 						throw new Error();
