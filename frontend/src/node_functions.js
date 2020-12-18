@@ -61,30 +61,50 @@ const queryNewWord = (word, state, dispatchState) => {
 				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 }
 
+const getFoundWords = async (words) => {
+		/* gets a list of word and removes the
+		 * one whihc are not in api*/
+		var foundWords = new Array(words.lenght)
+		await Promise.all( words.map( (word, index, array) => 
+				fetch(API_ENDPOINT+'check/'+ word +"/")
+				.then( response => response.json())
+				.then( response => { 
+						if(response.detail === "Found.") foundWords[index] = word})
+				.then( foundWords.filter( Boolean ) )
+				.catch(err => console.log(err))
+		))
+		return foundWords;
+}
+
+
 const queryPath = async (words, state, dispatchState) => {
 		/* gets passesed a set of two words, 
 		 * queries the server for the path and 
 		 * dispateches the result to state */
 		//split words into arrays
 		//let path;
-		try {
-				let first;
-				let second;
-				for( var i = 0; i+1 <= words.length-1; i++){
-						first = words[i];
-						second = words[i+1];
-						//for every node in the array get two by two
-						let request = await fetch(API_ENDPOINT+'path/'+ first +"/"+second)
-								.catch(err => { dispatchState({type:'SET_FETCH_FAILED'}); });
-						let result = await request.json(); // unpack json
-						result = catchError(result, state, dispatchState);
 
+		words = getFoundWords(words)
+		words.then( (words) =>  {
+				// get only the word in server
+				console.log(words)
+				console.log(words.length)
+				for(let i = 0; i+1 <= words.length-1; i++){
+						let first = words[i];
+						let second = words[i+1];
+						// for every node in the array get two by two
+						console.log(first)
+						console.log(second)
+						let request = fetch(API_ENDPOINT+'path/'+ first +"/"+second)
+								.catch(err => { dispatchState({type:'SET_FETCH_FAILED'}); });
+						let result =  request.json(); // unpack json
+						if(result.detail === "Path not found."){
+								console.log("path not found")
+						}
 				}
-		} catch (error) {
-				console.error(error);
-		}
-				
+		})
 		/*
+		 *
 		console.log("this ran")
 		let prevNode = null;
 		let first;
@@ -175,28 +195,44 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
 }
 
-
-
 const catchError = (response, state, dispatchState) =>{
 		/* Set error to state when user search a word not found */
 		//console.log("got to cath error:")
 		//console.log(response)
-		if(response.detail === "Not found.") {
-				dispatchState({ // if reponce is not found
-						type: 'SET_WORD_NOT_FOUND', 
-						payload: state.searchTerm});
-				throw new Error("word not found");
-		}else if(response.detail === "Path not found."){
-				// if the error is path not found
-				//console.log("path was not found")
-				dispatchState({ 
-						type: 'SET_PATH_NOT_FOUND', 
-						payload: { 
-								'first': response.first,
-								'last': response.last,
+		if(response instanceof Array){
+				let foundWords = []
+				//console.log("words was not found")
+				// if it has the response for many words
+				response.forEach((word, index, words) => {
+						if(word.detail === "Not Found."){
+								dispatchState({
+										type: 'SET_WORD_NOT_FOUND', 
+										payload: word.w_id});
+						}else{
+								foundWords.push(word);
 						}
 				})
-				throw new Error("path not found");
+				return foundWords;
+		}else{ // if it only one elment
+				if(response.detail === "Not found.") {
+						dispatchState({
+								type: 'SET_WORD_NOT_FOUND', 
+								payload: state.searchTerm});
+						throw new Error("word not found");
+				}else if(response.detail === "Path not found."){
+						// if the error is path not found
+						//console.log("path was not found")
+						dispatchState({
+								type: 'SET_PATH_NOT_FOUND', 
+								payload: { 
+										'first': response.first,
+										'last': response.last,
+								}
+						})
+						throw new Error("path not found");
+				}else{
+						return response
+				}
 		}
 }
 
