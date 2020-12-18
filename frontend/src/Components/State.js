@@ -7,6 +7,7 @@ const initial_state = {
 		selected:{},
 		definedNode:{},
 		isError: false,
+		errorMsg: "",
 		isFetchFailed: false,
 		isWordNotFound: false,
 		wordsNotFound: [],
@@ -156,6 +157,12 @@ const stateReducer = (state, action) =>{
 								isSideBar: !state.isSideBar,
 						};
 				case 'SET_FETCH_FAILED':
+						return {
+								...state,
+								isError: true,
+								errorMsg: action.payload,
+						};
+				case 'SET_ERROR':
 						return {
 								...state,
 								isError: true,

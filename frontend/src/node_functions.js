@@ -63,52 +63,75 @@ const queryNewWord = (word, state, dispatchState) => {
 
 const getFoundWords = async (words) => {
 		/* gets a list of word and removes the
+		 * this seemly simplet task is hard to do with promises
 		 * one whihc are not in api*/
 		var foundWords = new Array(words.lenght)
-		await Promise.all( words.map( (word, index, array) => 
+		// make a empty array of as long as
+		// the origial to mantain the same order
+		await Promise.all( words.map( (word, index) => 
+				// for every word check the api, 
+				// await untill all promises are returned
 				fetch(API_ENDPOINT+'check/'+ word +"/")
 				.then( response => response.json())
 				.then( response => { 
-						if(response.detail === "Found.") foundWords[index] = word})
-				.then( foundWords.filter( Boolean ) )
+						if(response.detail === "Found.") foundWords[index] = word })
+				.then( foundWords = foundWords.filter( Boolean ) )
 				.catch(err => console.log(err))
 		))
-		return foundWords;
+		return foundWords.filter( Boolean )
 }
 
+const pairUp = (list) => {
+		/* takes a list of inputs and 
+		 * divied it into pairs */
+		let pairs = []
+		for(let i = 0; i+1 <= list.length - 1; i++)
+				pairs.push({'first': list[i], 'last':list[i+1]})
+			return pairs
+}
 
 const queryPath = async (words, state, dispatchState) => {
 		/* gets passesed a set of two words, 
 		 * queries the server for the path and 
 		 * dispateches the result to state */
 		//split words into arrays
-		//let path;
+		words = await getFoundWords(words)
+				.catch(err => { dispatchState({
+						type:'SET_ERROR', 
+						payload:"Could not get words"})
+				});
+		let pathRequests = pairUp(words)
+		// get only the word in server
+		console.log(pathRequests)
+		await Promise.all( 
+				pathRequests.map((request) =>
+						fetch(API_ENDPOINT+'path/'+request.first+"/"+request.last)
+						.then( response => response.json())
+						.then( response => { 
+								if(response.detail === "Path not found."){ 
+										console.log("path not found")
+								}else{
+										console.log(response)
+								}
+						})
+						.catch(err => { dispatchState({type:'SET_FETCH_FAILED'})})
+				))
+		//let first = words[i];
+		//let second = words[i+1];
+		//console.log(first)
+		//console.log(second)
+		//let request = fetch(API_ENDPOINT+'path/'+ first +"/"+second)
+		//let result = request.json(); // unpack json
+		//if(result.detail === "Path not found."){
+		//console.log("path not found")
+		//}
 
-		words = getFoundWords(words)
-		words.then( (words) =>  {
-				// get only the word in server
-				console.log(words)
-				console.log(words.length)
-				for(let i = 0; i+1 <= words.length-1; i++){
-						let first = words[i];
-						let second = words[i+1];
-						// for every node in the array get two by two
-						console.log(first)
-						console.log(second)
-						let request = fetch(API_ENDPOINT+'path/'+ first +"/"+second)
-								.catch(err => { dispatchState({type:'SET_FETCH_FAILED'}); });
-						let result =  request.json(); // unpack json
-						if(result.detail === "Path not found."){
-								console.log("path not found")
-						}
-				}
-		})
 		/*
 		 *
-		console.log("this ran")
-		let prevNode = null;
-		let first;
-		let second;
+								console.log("this ran")
+						let prevNode = null;
+						let first;
+						let second;
 
 		for( var i = 0; i+1 <= words.length-1; i++){
 				first = words[i];
