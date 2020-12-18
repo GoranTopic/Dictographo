@@ -1,5 +1,5 @@
 from .models import Word, Definition, Example, Synonym_Relation
-from .serializers import WordSerializer, QuerySearchSerializer, CharFieldSerializer, ErrorMsgSerializer
+from .serializers import WordSerializer, QuerySearchSerializer, CharFieldSerializer, MsgSerializer
 from .permissions import IsAuthorOrReadOnly
 from .apps import ApiConfig
 from rest_framework import generics
@@ -40,11 +40,35 @@ class NeighborsDetail(generics.ListAPIView):
                     'first': first,
                     'last': last,
                     }
-
-        serializer = ErrorMsgSerializer(message, many=multiple)
+        serializer = MsgSerializer(message, many=multiple)
         # tranfer as json 
         return JsonResponse(serializer.data,safe=False)
-        
+     
+    def jsonFoundMsg(self, words=None, detail = "Found.", first=None, last=None ):
+        '''returns a dict with the not found word'''
+        if isinstance(words, list): 
+            multiple = True
+            message = []
+            for word in words:
+                message.append({ # not found dict
+                    'w_id': word, 
+                    'detail': detail,
+                    'first': first,
+                    'last': last,})
+        else:
+            word = words # there is only one word
+            multiple = False
+            message = { # not found dict
+                    'w_id': word, 
+                    'detail': detail,
+                    'first': first,
+                    'last': last,
+                    }
+        serializer = MsgSerializer(message, many=multiple)
+        # tranfer as json 
+        return JsonResponse(serializer.data,safe=False)
+     
+    
 
     def query_neighbors(self, word):
         '''return a list of neiboring word form a given word'''
@@ -115,7 +139,6 @@ class PathDetail(generics.ListAPIView):
                     # if the path does not exists
                     # append both neibors to the result
                     return jsonNotFoundMsg(self,detail ='Path not found.', first=first_word, last=second_word)
-
         # pass the word list thru the serilizer with parameter many 
         serializer = self.get_serializer(word_list, many=True)
         # tranfer as json 
@@ -142,3 +165,27 @@ class QuerySearchDetail(generics.ListAPIView):
         json = JSONRenderer().render(serializer.data)
         # send json data back, must have safe parameter as False
         return JsonResponse(serializer.data,safe=False)
+
+class CheckDetail(generics.RetrieveAPIView):
+    queryset = Word.objects.all()
+    serializer_class = MsgSerializer
+    permission_classes = (IsAuthorOrReadOnly,)
+    synonym_graph = ApiConfig.synonym_graph
+    jsonNotFoundMsg = NeighborsDetail.jsonNotFoundMsg
+    jsonFoundMsg = NeighborsDetail.jsonFoundMsg
+
+    def get(self, request, *args, **kwargs):
+        '''return true if word is in db and graph'''
+        word = kwargs['pk'] # get word from parameter
+        if Word.objects.filter(w_id=word).exists():
+            # if the word is in the db
+            node = self.get_queryset().get(w_id=word)
+            # get that word
+            if self.synonym_graph.has_node(node):
+                # check if that word is in graph
+                # return foumd msg
+                return self.jsonFoundMsg(words=word);
+        # return not found msg
+        return self.jsonNotFoundMsg(words=word);
+
+

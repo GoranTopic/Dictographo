@@ -34,7 +34,7 @@ class QuerySearchSerializer(serializers.Serializer):
     w_id = serializers.CharField(max_length=100)
     word = serializers.CharField(max_length=100)
     
-class ErrorMsgSerializer(serializers.Serializer):
+class MsgSerializer(serializers.Serializer):
     # serilaixer for error messages 
     w_id = serializers.CharField(max_length=100)
     detail = serializers.CharField(max_length=100)

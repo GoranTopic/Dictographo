@@ -74,12 +74,11 @@ const queryPath = async (words, state, dispatchState) => {
 						first = words[i];
 						second = words[i+1];
 						//for every node in the array get two by two
-						let request = await fetch(API_ENDPOINT + 'path/' +  first  + "/" + second)
+						let request = await fetch(API_ENDPOINT+'path/'+ first +"/"+second)
 								.catch(err => { dispatchState({type:'SET_FETCH_FAILED'}); });
 						let result = await request.json(); // unpack json
-						console.log(result);
-						//console.log(nodes)
-						//.then(nodes => catchError(nodes, state, dispatchState)) 	
+						result = catchError(result, state, dispatchState);
+
 				}
 		} catch (error) {
 				console.error(error);
@@ -176,45 +175,28 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
 }
 
+
+
 const catchError = (response, state, dispatchState) =>{
 		/* Set error to state when user search a word not found */
 		//console.log("got to cath error:")
 		//console.log(response)
-		if(response instanceof Array){
-				let foundWords = []
-				//console.log("words was not found")
-				// if it has the response for many words
-				response.forEach((word, index, words) => {
-						if(word.detail === "Not Found."){
-								dispatchState({
-										type: 'SET_WORD_NOT_FOUND', 
-										payload: word.w_id});
-						}else{
-								foundWords.push(word);
+		if(response.detail === "Not found.") {
+				dispatchState({ // if reponce is not found
+						type: 'SET_WORD_NOT_FOUND', 
+						payload: state.searchTerm});
+				throw new Error("word not found");
+		}else if(response.detail === "Path not found."){
+				// if the error is path not found
+				//console.log("path was not found")
+				dispatchState({ 
+						type: 'SET_PATH_NOT_FOUND', 
+						payload: { 
+								'first': response.first,
+								'last': response.last,
 						}
 				})
-				return foundWords;
-		}else{ // if it only one elment
-				//console.log("got word:")
-				if(response.detail === "Not found.") {
-						dispatchState({
-								type: 'SET_WORD_NOT_FOUND', 
-								payload: state.searchTerm});
-						throw new Error("word not found");
-				}else if(response.detail === "Path not found."){
-						// if the error is path not found
-						//console.log("path was not found")
-						dispatchState({
-								type: 'SET_PATH_NOT_FOUND', 
-								payload: { 
-										'first': response.first,
-										'last': response.last,
-								}
-						})
-						throw new Error("path not found");
-				}else{
-						return response
-				}
+				throw new Error("path not found");
 		}
 }
 

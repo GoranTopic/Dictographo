@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from .views import WordDetail, NeighborsDetail, PathDetail, QuerySearchDetail
+from .views import WordDetail, NeighborsDetail, PathDetail, QuerySearchDetail, CheckDetail
 
 urlpatterns = [
         # return the word value for a single word
@@ -11,4 +11,6 @@ urlpatterns = [
         path('path/<str:pk>/<str:second_pk>/', PathDetail.as_view()),
         # return words the share the same start
         path('querysearch/<str:pk>/', QuerySearchDetail.as_view()),
+        # check if the word is in db and graph
+        path('check/<str:pk>/', CheckDetail.as_view()),
         ]
