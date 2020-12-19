@@ -13,6 +13,7 @@ class ApiConfig(AppConfig):
         '''
         # Call get database
         synonym_model = AppConfig.get_model(self, 'Synonym_Relation')
+        # nodes_model = AppConfig.get_model(self, 'Words')
         # Queryset all 
         relations = synonym_model.objects.all()
         # query all values from word_from

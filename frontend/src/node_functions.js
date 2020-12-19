@@ -91,10 +91,24 @@ const getFoundWords = async (words, dispatchState) => {
 										type:'SET_WORD_NOT_FOUND', 
 										payload: word})
 						}
-				}).then( foundWords = foundWords.filter( Boolean ))
+				})
 				.catch(err => console.log(err))
 		))
 		return foundWords.filter( Boolean )
+}
+
+const processPath = (path) =>{
+		/* add for each node in the path where it comming from */
+		let prevNode = null;
+		if(path instanceof Array){  
+				path.forEach((node) => {
+						node = processNode(node);
+						node['prevNode'] = (prevNode)? prevNode : node.id;
+						// if it is start of path set first previous to itself
+						prevNode = node.id;
+				})
+		}
+		return path
 }
 
 const fetchPathsParts = async (pathRequests, dispatchState) => {
@@ -105,9 +119,9 @@ const fetchPathsParts = async (pathRequests, dispatchState) => {
 				pathRequests.map((request, index) =>
 						fetch(API_ENDPOINT+'path/'+request.first+"/"+request.last)
 						.then( response => response.json())
+						.then( response => processPath(response))
 						.then( response => { 
 								if(response.detail === "Path not found."){ 
-										console.log(request)
 										dispatchState({
 												type:'SET_PATH_NOT_FOUND', 
 												payload: request});
@@ -121,6 +135,101 @@ const fetchPathsParts = async (pathRequests, dispatchState) => {
 		return paths;
 }
 
+const amendPath = async (paths) => {
+		const getGaps = (paths) => {
+				let gaps = [];
+				let gap = {start:null, end:null}
+				let wasPath = false;
+				let wasGap = false;
+				paths.forEach((path, index) => {
+						if(path === null ){// if it is gap
+								if(wasPath){  // comes from gap
+										gap.start = index //save start
+								}
+								// and comes from path
+								wasGap = true; // switch to gap
+								wasPath = false 
+						}else{ //if is path
+								if(wasGap){   // and comes from gap
+										gap.end = index; // record end
+										gaps.push({...gap}); //save gap
+								} 
+								wasPath = true; // switch to path 
+								wasGap = false;
+						}
+				}) 
+				return gaps;
+		}
+
+		const bridgeGap = async (start, end, paths) => {
+			/* gets a set of indexes indicating the gap, 
+			 * make fetch request to attempt to find a 
+			 * conncetion */
+				let pathL = paths[start-1];
+				let pathR = paths[end]
+				let lastWord = pathL[pathL.length-1].word;
+				let bridgeFound = false;
+				let index = (end-start >1)?0:1;
+				while(!bridgeFound && index < pathR.length-1){ 
+						//need to user while loop there is one fetch at the time 
+						await fetch(API_ENDPOINT+'path/'+lastWord+"/"+pathR[index].word)
+						.then( response => response.json())
+						.then( response => processPath(response))
+						.then( response => { 
+								if(response.detail === "Path not found."){ 
+										index++;
+								}else{
+										bridgeFound = true; //break loop
+										paths[start] = response; //set the bridge
+								}
+						})
+						.catch(err => console.log(err))
+				}
+		}
+		let gaps = getGaps(paths);
+		await Promise.all(gaps.map( gap => bridgeGap(gap.start, gap.end, paths)))
+		return paths
+}
+
+
+const dispatchPath = (paths, state, dispatchState) => {
+		// paths all list together
+		let finalPath = [];
+		paths = paths.filter( Boolean );
+		paths.forEach(path => finalPath.push(...path)) // add all paths together
+		console.log(finalPath)
+		finalPath.forEach((node, index) => 
+				timelyDispatch(() => {  
+						console.log(state.isEmpty)
+						if(index === 0){ 
+								// if this is the first node
+								dispatchState({
+										type: 'SET_NEW_NODE', 
+										payload: node,
+								})
+						}else{
+								console.log(node.prevNode)
+								console.log(" --> ")
+								console.log(node.id)
+								console.log("\n")
+								//if there is already other nodes
+								let msg = {
+										type: 'SET_PATH_NODE', 
+										payload: { 
+												node: node,
+												link: { 
+														target: node.id,
+														source: node.prevNode, 
+												}
+										}
+								}
+								dispatchState(msg)
+						}
+				}, 25,0)
+		) //se the time as 25 and the random to 0
+}
+
+
 const queryPath = async (words, state, dispatchState) => {
 		/* gets passesed a set of two words, 
 		 * queries the server for the path and 
@@ -132,14 +241,20 @@ const queryPath = async (words, state, dispatchState) => {
 						payload:"Could not get words"})
 				});
 		let pathRequests = pairUp(words)
-		// get only the word in server
 		let pathParts = await fetchPathsParts(pathRequests, dispatchState)
-						.catch(err => {dispatchState({
-								type:'SET_ERROR', 
-								payload: "could not get paths"} 
-						)})
+				.catch(err => {dispatchState({
+						type:'SET_ERROR', 
+						payload: "could not get paths"} 
+				)})
 		console.log(pathParts);
-
+		let finalPaths = await amendPath(pathParts)
+				.catch(err => {dispatchState({
+						type:'SET_ERROR', 
+						payload: "Could not amend path"} 
+				)})
+		dispatchPath(finalPaths, state, dispatchState);
+		
+		
 		//let first = words[i];
 		//let second = words[i+1];
 		//console.log(first)

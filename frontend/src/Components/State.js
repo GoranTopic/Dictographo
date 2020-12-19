@@ -162,13 +162,13 @@ const stateReducer = (state, action) =>{
 						return {
 								...state,
 								isError: true,
-								errorMsg: action.payload,
+								isFetchFailed: true,
 						};
 				case 'SET_ERROR':
 						return {
 								...state,
 								isError: true,
-								isFetchFailed: true,
+								errorMsg: action.payload,
 						};
 				default:
 						throw new Error();
