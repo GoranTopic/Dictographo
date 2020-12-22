@@ -17,23 +17,18 @@ function SuggestionsContainer(props){
 		// handle the change by seting the state variable to 
 		let state = props.state
 		let dispatchState = props.dispatchState;
-		const activeSuggestion = 1;
 		const [suggestions, setSuggestions] = useState([])	
-		const [selected, setSetselected] = useState(0)	
-	
-
+		const [selected, setSetselected] = useState(1)	
 
 		useKeypress('ArrowDown', () => {
-				setSetselected(setSetselected - 1);
+				setSetselected(selected - 1);
 				console.log(selected);
 		});
 
 		useKeypress('ArrowUp', () => {
-				setSetselected(setSetselected + 1);
+				setSetselected(selected + 1);
 				console.log(selected);
 		});
-
-
 
 		useKeypress('Enter', () => console.log("key pressed"));
 
@@ -59,7 +54,7 @@ function SuggestionsContainer(props){
 				let wordList = state.searchTerm.split(" ");
 				//split the search into words
 				let len = wordList.length;
-				//get te lenght
+				//get the length
 				let last = wordList[len-1]
 				//fetch the last element 
 				fetch(API_ENDPOINT + query_search + last)
@@ -70,17 +65,23 @@ function SuggestionsContainer(props){
 						.catch((err) => console.log(err));
 		}, [state.searchTerm, dispatchState])
 
+		const isWrittingWord = () =>{
+				/* uses the state to see if
+						* the user is in the middle of writting a word */
+				let len = state.searchTerm.length;
+				let last = state.searchTerm[state.searchTerm.length-1];
+				if(len === 0){ return false;
+				}else if (last === " "){ return false;
+				}else return true; 
+		}
 
 		const SuggestionList = () =>
 				<ul class="suggestions">
 						{ suggestions.map(
 								(suggestion, index) => {  
-										let className;
-										if (index === selected) 
-												className = styles.active
 										return  <li 
 												key={index} 
-												className={className}
+												className={index === selected? styles.selected: null}
 												onClick={() => onClick(suggestion.word)}>
 												{suggestion.word}
 										</li>
@@ -90,7 +91,7 @@ function SuggestionsContainer(props){
 
 						return <div className="input">
 								{props.children}
-								{state.searchTerm.length > 2? <SuggestionList/>: <></> }
+								{isWrittingWord()? <SuggestionList/>: <></> }
 						</div>
 }
 

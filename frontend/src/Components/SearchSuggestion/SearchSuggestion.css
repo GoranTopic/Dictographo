@@ -7,16 +7,10 @@ input {
 		border: 1px solid #999;
 		padding: 0.5rem;
 		width: 300px;
-
-}
-
-.no-suggestions {
-		color: #999;
-		padding: 0.5rem;
-
 }
 
 .suggestions {
+		background-color: white;
 		border: 1px solid #999;
 		border-top-width: 0;
 		list-style: none;
@@ -25,18 +19,25 @@ input {
 		overflow-y: auto;
 		padding-left: 0;
 		width: calc(300px + 1rem);
-
 }
+
+
 
 .suggestions li {
 		padding: 0.5rem;
 
 }
 
-.active,
-.suggestion-active,
+.selected {
+		background-color: red;
+		color: #fae042;
+		cursor: pointer;
+		font-weight: 700;
+
+}
+
 .suggestions li:hover {
-		background-color: #ffffff;
+		background-color: red;
 		color: #fae042;
 		cursor: pointer;
 		font-weight: 700;

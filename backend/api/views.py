@@ -165,13 +165,14 @@ class QuerySearchDetail(generics.ListAPIView):
         search_key = kwargs['pk']
         min_search_key_length = 2
         queried_list = []
-        if len(search_key) > min_search_key_length:  
+        if len(search_key) >= min_search_key_length:  
             # if it is grater then the minimum size
             queried_list = Word.objects.filter(w_id__startswith=search_key)
         # filter words which we don't want to suggest
-        queried_list = filter(self.filterSuggestion, queried_list)
+        queried_list = list(filter(self.filterSuggestion, queried_list))
         # only get the first 15 words
-        #queried_list = queried_list[:15]
+        if len(queried_list) > 15: 
+                queried_list = queried_list[:15]
         # pass thru the serilizer as many 
         serializer = self.get_serializer(queried_list, many=True)
         # tranfer as json 
