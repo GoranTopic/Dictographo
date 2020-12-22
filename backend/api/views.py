@@ -159,6 +159,12 @@ class QuerySearchDetail(generics.ListAPIView):
         if len(search_key) > min_search_key_lenght:  
             # if it is grater then the minimum size
             queried_list = Word.objects.filter(w_id__startswith=search_key)
+        def has_space( word ):
+           return " " not in word.w_id
+        # filter words which has a space
+        queried_list = filter(has_space, queried_list)
+        # only get the first 15 words
+        queried_list = queried_list[:15]
         # pass thru the serilizer as many 
         serializer = self.get_serializer(queried_list, many=True)
         # tranfer as json 

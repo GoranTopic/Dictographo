@@ -169,7 +169,8 @@ const amendPath = async (paths) => {
 				let pathR = paths[end]
 				let lastWord = pathL[pathL.length-1].word;
 				let bridgeFound = false;
-				let index = (end-start >1)?0:1;
+				// if there exacly one gap, dont bother chechi
+				let index = (end-start > 1)? 0 : 1; 
 				while(!bridgeFound && index < pathR.length-1){ 
 						//need to user while loop there is one fetch at the time 
 						await fetch(API_ENDPOINT+'path/'+lastWord+"/"+pathR[index].word)
@@ -225,7 +226,7 @@ const dispatchPath = (paths, state, dispatchState) => {
 								}
 								dispatchState(msg)
 						}
-				}, 25,0)
+				}, 1,0)
 		) //se the time as 25 and the random to 0
 }
 

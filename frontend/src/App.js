@@ -10,7 +10,6 @@ import './App.css';
 function App() {
 		/* define dispatcher for the Internal data */
 		const [state, dispatchState] = React.useReducer( stateReducer, initial_state );
-
 		return (
 				<div className="App">
 						<NavBarContainer 

@@ -1,11 +1,11 @@
 import React from 'react';
 import { queryNewWord, queryPath } from '../node_functions';
 import { colors }  from "../myConfig";
+import SuggestionsContainer from "./SearchSuggestion/SearchSuggestion";
 import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon  } from '@fortawesome/react-fontawesome'
 import { faSlidersH } from '@fortawesome/free-solid-svg-icons'
-
 /*
  * =======================================
  *      NavBar Componente for React 
@@ -40,7 +40,6 @@ function NavBarContainer({ state, dispatchState }){
 				//trim, remove multiple and seperate by spaces
 				return string.replace(/  +/g, ' ').trim().split(' ') 
 		}
-		
 
 		const handleToggleDeepLinks = () => {
 				/* hangles the toggle of the deep links, 
@@ -63,14 +62,19 @@ function NavBarContainer({ state, dispatchState }){
 						<Navbar.Brand href="index.html" className="row"  >
 								<h1>Dictographo</h1>
 						</Navbar.Brand>
-						<InputGroup  size='lg' md='auto' className="mx-3" style={{maxWidth: "600px"}} >
-								<FormControl size="lg" as='input' type="text" placeholder="Dog Cat" 
-										value={state.searchTerm} onChange={handleSearchChange} 
-										onKeyPress={event => (event.key === "Enter") && handleSearchSubmit()}/>
-								<InputGroup.Append>
-										<Button size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
-								</InputGroup.Append>
-						</InputGroup>
+						<SuggestionsContainer
+								state={state}
+								dispatchState={dispatchState}
+						>
+								<InputGroup  size='lg' md='auto' className="mx-3" style={{maxWidth: "600px"}} >
+										<FormControl size="lg" as='input' type="text" placeholder="Dog Cat" 
+												value={state.searchTerm} onChange={handleSearchChange} 
+												onKeyPress={event => (event.key === "Enter") && handleSearchSubmit()}/>
+										<InputGroup.Append>
+												<Button size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
+										</InputGroup.Append>
+								</InputGroup>
+						</SuggestionsContainer>
 						<Navbar.Collapse id="basic-navbar-nav">
 								<Nav className="ml-auto mx-4">
 										<NavDropdown variant="dark"
