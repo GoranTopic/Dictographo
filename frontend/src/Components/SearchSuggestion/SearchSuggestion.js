@@ -94,23 +94,41 @@ function SuggestionsContainer(props){
 		let state = props.state
 		let dispatchState = props.dispatchState;
 		const activeSuggestion = 1;
-		const  [suggestions, setSuggestions] = useState([])	
+		const [suggestions, setSuggestions] = useState([])	
+		const [selected, setSetselected] = useState(0)	
 				
 		const filterSuggestions = suggestions => 
 				suggestions.filter( suggestion => /\s/.test(suggestion))
 
+		const onClick = (word) => {
+				/* append a given word to the seate searchTerm */
+				let wList = state.searchTerm.split(" ");
+				let len = wList.length 
+				wList[len-1] = word // set the last word as clicke word
+				dispatchState({ 
+						type: 'SET_SEARCH_TERM',
+						payload: wList.join(" ") + " ",
+				});	
+				setSuggestions([]); // reset suggestions
+		}
+
+
 		useEffect(() => {
 				/* query server for search suggestionsa
 				 * and sets the  */
-				console.log("I ran");
-				fetch(API_ENDPOINT + query_search + state.searchTerm)
+				let wordList = state.searchTerm.split(" ");
+				//split the search into words
+				let len = wordList.length;
+				//get te lenght
+				let last = wordList[len-1]
+				//fetch the last element 
+				fetch(API_ENDPOINT + query_search + last)
 						.then(result => result.json()) //unpack suggestions
 						.then(result => {console.log(result); return result}) //unpack suggestions
 						.then(suggestions => filterSuggestions(suggestions))
 						.then(suggestions => setSuggestions(suggestions))
 						.catch((err) => console.log(err));
 		}, [state.searchTerm, dispatchState])
-
 
 		const SuggestionList = () =>
 				<ul class="suggestions">
@@ -121,7 +139,8 @@ function SuggestionsContainer(props){
 												className = styles.active
 										return  <li 
 												key={index} 
-												className={className}>
+												className={className}
+												onClick={() => onClick(suggestion.word)}>
 												{suggestion.word}
 										</li>
 								}

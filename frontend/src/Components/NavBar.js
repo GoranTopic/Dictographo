@@ -16,9 +16,11 @@ import { faSlidersH } from '@fortawesome/free-solid-svg-icons'
 function NavBarContainer({ state, dispatchState }){
 
 		// handle the change by seting the state variable to 
-		const handleSearchChange = change => dispatchState({ 
-				type: 'SET_SEARCH_TERM',
-				payload: change.target.value });
+		const handleSearchChange = change => 
+				dispatchState({ 
+						type: 'SET_SEARCH_TERM',
+						payload: change.target.value 
+				});
 
 		const handleSearchSubmit = () =>  {
 				/* handle submit search button */

@@ -150,21 +150,28 @@ class QuerySearchDetail(generics.ListAPIView):
     queryset = Word.objects.all()
     serializer_class = QuerySearchSerializer
     permission_classes = (IsAuthorOrReadOnly,)
+    synonym_graph = ApiConfig.synonym_graph
     
+    def filterSuggestion(self, word):
+        if " "  in word.w_id:
+            # don't send word that have spaces in the
+            if self.synonym_graph.has_node(word):
+                # nor words which are not in our graph
+                return True
+        return False
+
     def get(self, request, *args, **kwargs):
         ''' get a word and return a list of the json with requested word and neiboring words '''
         search_key = kwargs['pk']
-        min_search_key_lenght = 2
+        min_search_key_length = 2
         queried_list = []
-        if len(search_key) > min_search_key_lenght:  
+        if len(search_key) > min_search_key_length:  
             # if it is grater then the minimum size
             queried_list = Word.objects.filter(w_id__startswith=search_key)
-        def has_space( word ):
-           return " " not in word.w_id
-        # filter words which has a space
-        queried_list = filter(has_space, queried_list)
+        # filter words which we don't want to suggest
+        queried_list = filter(self.filterSuggestion, queried_list)
         # only get the first 15 words
-        queried_list = queried_list[:15]
+        #queried_list = queried_list[:15]
         # pass thru the serilizer as many 
         serializer = self.get_serializer(queried_list, many=True)
         # tranfer as json 
