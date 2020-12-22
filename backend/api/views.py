@@ -153,7 +153,7 @@ class QuerySearchDetail(generics.ListAPIView):
     synonym_graph = ApiConfig.synonym_graph
     
     def filterSuggestion(self, word):
-        if " "  in word.w_id:
+        if " " not in word.w_id:
             # don't send word that have spaces in the
             if self.synonym_graph.has_node(word):
                 # nor words which are not in our graph
