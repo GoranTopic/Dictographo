@@ -69,7 +69,7 @@ function NavBarContainer({ state, dispatchState }){
 								dispatchState={dispatchState}
 						>
 								<InputGroup  size='lg' md='auto' className="mx-3" style={{maxWidth: "600px"}} >
-										<FormControl size="lg" as='input' type="text" placeholder="Dog Cat" 
+										<FormControl size="lg" as='input' type="text" placeholder="Write some words here..." 
 												value={state.searchTerm} onChange={handleSearchChange} />
 										<InputGroup.Append>
 												<Button size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
@@ -82,9 +82,6 @@ function NavBarContainer({ state, dispatchState }){
 												size="lg" title="Options" 
 												icon={<FontAwesomeIcon icon={faSlidersH}/>}
 												id="basic-nav-dropdown">
-												<NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-												<NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
-												<NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
 												<NavDropdown.Divider />
 												<Form.Check type="switch" id="custom-switch" label="Deep Links"
 														value={state.isDeepLinks} 
