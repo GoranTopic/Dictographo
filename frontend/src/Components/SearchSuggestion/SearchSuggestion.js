@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { API_ENDPOINT }  from "../../myConfig";
 import useKeypress from '../../hooks/useKeypress';
-import styles from './SearchSuggestion.css'; 
+import './SearchSuggestion.css'; 
+import { queryNewWord, queryPath } from '../../node_functions';
 
 /*
  * =======================================
@@ -18,35 +19,79 @@ function SuggestionsContainer(props){
 		let state = props.state
 		let dispatchState = props.dispatchState;
 		const [suggestions, setSuggestions] = useState([])	
-		const [selected, setSetselected] = useState(1)	
+		const [selected, setSelected] = useState(0)	
+		
 
-		useKeypress('ArrowDown', () => {
-				setSetselected(selected - 1);
-				console.log(selected);
-		});
+		useKeypress('ArrowDown', () =>
+				(selected < 0)?
+				setSelected(suggestions.length-1)
+				: setSelected(selected + 1)
+		);
 
-		useKeypress('ArrowUp', () => {
-				setSetselected(selected + 1);
-				console.log(selected);
-		});
+		useKeypress('ArrowUp', () => 
+				(selected > suggestions.length-1)?
+				setSelected(0)
+				:setSelected(selected - 1)
+		);
 
-		useKeypress('Enter', () => console.log("key pressed"));
 
+		const getmultipleWords = (string) => {
+				/* determines qhereteher a string 
+				 * is compossed of multiple words */
+				//remove multiple spaces
+				//trim, remove multiple and seperate by spaces
+				return string.replace(/  +/g, ' ').trim().split(' ') 
+		}
+
+		useKeypress('Enter', () => {
+				if(isWrittingWord()){
+						if(suggestions.length > 0){
+								addToSearchTerm(suggestions[selected].word);
+						}
+				}else{
+						let words = getmultipleWords(state.searchTerm.toLowerCase());
+						// set all serches to lowercase
+						if(words.length > 1){
+								//if it has more that two words
+								queryPath(words, state, dispatchState);
+						}else{ 
+								// if there is only one word
+								queryNewWord(words[0], state, dispatchState);
+						}
+				}
+		})
+
+		const isWrittingWord = () =>{
+				/* uses the state to see if
+						* the user is in the middle of writting a word */
+				let len = state.searchTerm.length;
+				let last = state.searchTerm[state.searchTerm.length-1];
+				if(len === 0){ return false;
+				}else if (last === " "){ return false;
+				}else return true; 
+		}
 
 		const filterSuggestions = suggestions => 
+				/* filter out all words which have spaces */
 				suggestions.filter( suggestion => /\s/.test(suggestion))
 
-		const onClick = (word) => {
+		
+		const addToSearchTerm = (word) => {
 				/* append a given word to the seate searchTerm */
-				let wList = state.searchTerm.split(" ");
-				let len = wList.length 
-				wList[len-1] = word // set the last word as clicke word
+				let wordList = state.searchTerm.split(" ");
+				let len = wordList.length 
+				wordList[len-1] = word // set the last word as clicke word
 				dispatchState({ 
 						type: 'SET_SEARCH_TERM',
-						payload: wList.join(" ") + " ",
+						payload: wordList.join(" ") + " ",
 				});	
 				setSuggestions([]); // reset suggestions
+				setSelected(0); // reset selected
 		}
+
+
+		const onClick = (word) => addToSearchTerm(word);
+		
 
 		useEffect(() => {
 				/* query server for search suggestionsa
@@ -65,15 +110,6 @@ function SuggestionsContainer(props){
 						.catch((err) => console.log(err));
 		}, [state.searchTerm, dispatchState])
 
-		const isWrittingWord = () =>{
-				/* uses the state to see if
-						* the user is in the middle of writting a word */
-				let len = state.searchTerm.length;
-				let last = state.searchTerm[state.searchTerm.length-1];
-				if(len === 0){ return false;
-				}else if (last === " "){ return false;
-				}else return true; 
-		}
 
 		const SuggestionList = () =>
 				<ul class="suggestions">
@@ -81,7 +117,7 @@ function SuggestionsContainer(props){
 								(suggestion, index) => {  
 										return  <li 
 												key={index} 
-												className={index === selected? styles.selected: null}
+												className={index === selected? "selected": null}
 												onClick={() => onClick(suggestion.word)}>
 												{suggestion.word}
 										</li>

@@ -12,7 +12,7 @@ export default function useKeypress(key, action) {
 				window.addEventListener('keyup', onKeyup);
 				return () => window.removeEventListener('keyup', onKeyup);
 				  
-		}, []);
+		}, [action, key]);
 		
 }
 

@@ -8,13 +8,12 @@ const API_ENDPOINT = DEBUGGING ?
 	'http://127.0.0.1:8000/api/' :  //debuging local
 	'http://128.199.9.124:8080/api/' //production
 
-
 function getWindowDimensions() {
 		const { innerWidth: width, innerHeight: height  } = window;
 		return { width, height };
 }
 
-const {width, height } = getWindowDimensions();
+const {width, height} = getWindowDimensions();
 
 const colors = {
 		red: '#800517', // firerick
@@ -30,7 +29,8 @@ const colors = {
 				onPath: '#990012', // red wine
 		},
 		link:{
-				default: '#D1D0CE', // gray goose
+				default: 'rgba(23,162,184,50%)', //bootstrap faded info blue
+				gray: '#D1D0CE', // gray goose
 				onPath: '#990012', // Red wine
 				highlight: '#E41B17', // red
 				antonim: '',

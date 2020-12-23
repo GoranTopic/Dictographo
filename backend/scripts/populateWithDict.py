@@ -34,7 +34,7 @@ syno_objs = []
 for entry in dictionary:
     print(f"getting word: {entry['word']}")
     # make the word objec
-    word_obj = Word(w_id=entry['link_id'], word=entry['word'], url=entry['url'], etymology=entry['etymology'], notes=entry['notes'])
+    word_obj = Word(w_id=entry['link_id'].lower(), word=entry['word'].lower(), url=entry['url'], etymology=entry['etymology'], notes=entry['notes'])
     # make the definition objects
     definitions = entry['definitions']
     if isinstance(definitions, list): 
@@ -58,25 +58,26 @@ print("Creating Definitions, done!")
 Example.objects.bulk_create(exam_objs)
 print("Creating Examples, done!")
 print("Getting the synonim realtions")
-# it was nesseary to finish first the the Words so that for each relation it can gind a word
+# it was nesseary to finish first the the Words so that for each relation it can given a word
 
 def run():
     err_file = open("erroed_words", 'a')
     syno_objs = []
     for entry in dictionary:
         # get word
-        word_obj = Word.objects.get(w_id=entry['link_id'])
+        word_obj = Word.objects.get(w_id=entry['link_id'].lower())
         synonyms = entry['synonyms']
         for synonym in synonyms:
             print(f"getting word: {entry['word']} synonym: {synonym}")
             try:
-                syno_obj = Word.objects.get(w_id=synonym)
+                syno_obj = Word.objects.get(w_id=synonym.lower())
                 syno_objs.append(Synonym_Relation(word_from=word_obj, synonym=syno_obj))
             except:
                 print(f"could not get synonym: {synonym}!")
                 err_file.write(synonym)
                 err_file.write('\n')
                 
+
 
     Synonym_Relation.objects.bulk_create(syno_objs)
     print("Creating Synonym_Relations, done!")

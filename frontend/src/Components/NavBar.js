@@ -70,8 +70,7 @@ function NavBarContainer({ state, dispatchState }){
 						>
 								<InputGroup  size='lg' md='auto' className="mx-3" style={{maxWidth: "600px"}} >
 										<FormControl size="lg" as='input' type="text" placeholder="Dog Cat" 
-												value={state.searchTerm} onChange={handleSearchChange} 
-												onKeyPress={event => (event.key === "Enter") && handleSearchSubmit()}/>
+												value={state.searchTerm} onChange={handleSearchChange} />
 										<InputGroup.Append>
 												<Button size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
 										</InputGroup.Append>

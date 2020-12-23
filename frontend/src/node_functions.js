@@ -8,6 +8,9 @@ import { getRandomInt }  from "./Components/RandomGenerator";
  * 
  */
 
+/* 
+ * Functions for processing single node search and adjacent nodes 
+ * */
 
 const processNode = (node) =>{
 		/* process a node from the api into one for the dispatcher
@@ -19,62 +22,109 @@ const processNode = (node) =>{
 		return node
 }
 
-// retrive node with given node id from state 
-const getNode = (nodeId, state) => state.nodes.filter( node => node.id === nodeId )[0]
+/* retrive node with given node id from state */
+const getNode = (nodeId, state) => 
+		state.nodes.filter( node => 
+				node.id === nodeId )[0]
 
-// attemps to return true id node is not in state, 
-// maybe make a dic so that is it not n time
-const isNewNode = (nodeId, state) => state.nodes.every( node => node.id !== nodeId )
+/* returns true id node is not in state in state, 
+ * could import time complexity by using a hash table */
+const isNewNode = (nodeId, state) => 
+		state.nodes.every( node => node.id !== nodeId )
 
+/* when user clicks on a node, query adjacent nodes
+ * and set node as selected */
 const onClickNode = (nodeId, state, dispatchState) => {
-		// when user clicks on a node
 		queryAdjecentNodes(getNode(nodeId, state), state, dispatchState)
-		dispatchState({type:'SWITCH_SELECTED_NODE', payload: nodeId})  
-};
+		dispatchState({type:'SWITCH_SELECTED_NODE', payload: nodeId})};
 
-const timelyDispatch = (dispatchFunc , waitTime=0, random=10) => {
-	/* takes a dispachState functions and dispaches it in a 
+/* takes a dispachState functions and dispaches it in a 
 	 * random timply fashion this is usefulf for node not to 
 	 * appear all at once in the graph and make it easier on 
 	 * the browser. Returns nothing*/
+const timelyDispatch = (dispatchFunc , waitTime=0.5, random=0) => 
 		setTimeout(dispatchFunc, waitTime + getRandomInt(random));
-}
 
+/* reset the graph state and start a new query into a word, 
+ * sometime this stymes when it is called a second time,
+ * this might be because of dispatchState being called twice
+ * must investigate.  */
 const queryNewWord = (word, state, dispatchState) => {
-		/* reset the graph state and start a new query into a word, 
-		 * sometime this stymes when it is called a second time,
-		 * this might be because of dispatchState being called twice
-		 * must investigate.  */
-		fetch(API_ENDPOINT + word)
-		// unpack json
-				.then(result => result.json()) //unpack word
-				.then(result => catchError(result, state, dispatchState))//check if word was found
-				.then(result => processNode(result)) //process node
-				.then(node => { //dispatch word
+		fetch(API_ENDPOINT + word) // fetch word
+				.then(result => //unpack node
+						result.json())
+				.then(result => //check if word was found
+						catchError(result, state, dispatchState)) 
+				.then(result => //process node
+						processNode(result)) 
+				.then(node => { //dispatch as new word
 						dispatchState({
 								type: 'SET_NEW_NODE', 
 								payload: node
 						}); 
 						return node; })
-		// get the surrounding words
-				.then(node => queryAdjecentNodes(node, state, dispatchState))
-				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
+				.then(node => // get the surrounding words
+						queryAdjecentNodes(node, state, dispatchState))
+				.catch(() => 
+						dispatchState({type:'SET_FETCH_FAILED'}));
 }
 
+/* Fetch all the adjancent node of a given node and dispatch */
+const queryAdjecentNodes = (node, state, dispatchState) => {
+		// define whether we should link te deeper
+		let linkAll = state.isDeepLinks;
+		// define which type of graph we are requesting
+		let graph_type = 'synonyms/';
+		// fetch nodes
+		fetch(API_ENDPOINT + graph_type + node.id )
+				.then(result =>// request the synonyms
+						result.json())
+						.then(result =>// catch erros if there are any
+								catchError(result, state, dispatchState))
+						.then(adjNodes =>  
+								adjNodes.forEach(// for every node in the fetched array
+										adjNode => timelyDispatch(() => {// dispacth timely
+												// for each of the nodes in the list 		
+												adjNode = processNode(adjNode); //process node 
+												// proces is it is new node, or deep link set
+												if(linkAll || isNewNode(adjNode.id, state)){
+														dispatchState({//dispatch node with link node
+																type: 'SET_NODE_LINK', 
+																payload: { 
+																		node: adjNode,
+																		link: { 
+																				source: node.id ,  
+																				target: adjNode.id 
+																		}
+																}
+														})
+												}
+										})
+						
+				))
+				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
+}
+
+
+/* 
+ * Functions for processing paths of nodes 
+ *
+ * */
+
+/* takes a list of inputs 
+ * and divied it into pairs */
 const pairUp = (list) => {
-		/* takes a list of inputs and 
-		 * divied it into pairs */
-		let pairs = []
+		let pairs = [];
 		for(let i = 0; i+1 <= list.length - 1; i++)
-				pairs.push({'first': list[i], 'last':list[i+1]})
-			return pairs
+				pairs.push({'first': list[i], 'last':list[i+1]});
+		return pairs
 }
 
-
-const getFoundWords = async (words, dispatchState) => {
-		/* gets a list of word and removes the
-		 * this seemly simplet task is hard to do with promises
-		 * one whihc are not in api*/
+/* gets a list of word and removes the ones which 
+ * do not checkout in the api.
+ * This seemly simple task becomes complex to do 
+ * with promises*/
+const removeNotFoundWords = async (words, dispatchState) => {
 		var foundWords = new Array(words.lenght)
 		// make a empty array of as long as
 		// the origial to mantain the same order
@@ -97,12 +147,13 @@ const getFoundWords = async (words, dispatchState) => {
 		return foundWords.filter( Boolean )
 }
 
+/* add for each node in the path where it comming from */
 const processPath = (path) =>{
-		/* add for each node in the path where it comming from */
-		let prevNode = null;
-		if(path instanceof Array){  
-				path.forEach((node) => {
-						node = processNode(node);
+		let prevNode = null; //declare prev node
+		if(path instanceof Array){ // only if it is a list 
+				path.forEach((node) => { 
+						node = processNode(node); //might as well process node 
+						// set the previous node if there was a previous one
 						node['prevNode'] = (prevNode)? prevNode : node.id;
 						// if it is start of path set first previous to itself
 						prevNode = node.id;
@@ -111,9 +162,10 @@ const processPath = (path) =>{
 		return path
 }
 
+
+/* gets a list of pair request for paths an queryes the api 
+ * then is saves those paths in a order list and returns*/
 const fetchPathsParts = async (pathRequests, dispatchState) => {
-		/* gets a list of pair request for paths an queryes the api 
-		 * then is saves those paths in a order list and returns*/
 		var paths = new Array(pathRequests.length)
 		await Promise.all( 
 				pathRequests.map((request, index) =>
@@ -161,60 +213,87 @@ const amendPath = async (paths) => {
 				return gaps;
 		}
 
-		const bridgeGap = async (start, end, paths) => {
-			/* gets a set of indexes indicating the gap, 
-			 * make fetch request to attempt to find a 
-			 * conncetion */
-				let pathL = paths[start-1];
-				let pathR = paths[end]
-				let lastWord = pathL[pathL.length-1].word;
-				let bridgeFound = false;
-				// if there exacly one gap, dont bother chechi
-				let index = (end-start > 1)? 0 : 1; 
-				while(!bridgeFound && index < pathR.length-1){ 
-						//need to user while loop there is one fetch at the time 
-						await fetch(API_ENDPOINT+'path/'+lastWord+"/"+pathR[index].word)
-						.then( response => response.json())
-						.then( response => processPath(response))
-						.then( response => { 
-								if(response.detail === "Path not found."){ 
-										index++;
-								}else{
-										bridgeFound = true; //break loop
-										paths[start] = response; //set the bridge
+		function* generateSequence(start, end, paths) {
+				// for every path left in paths
+				for(let pathIndex = end; pathIndex < paths.length; pathIndex++){
+						let curPath = paths[pathIndex]
+						if(paths[pathIndex] !== null){ // if it is not a null path
+								// 	if gap is one length, start at 1, else 0
+								//let index = (end-start > 1)? 0 : 1; 
+								// for every node in the current path
+								for(let nodeIndex = 0; nodeIndex < curPath.length; nodeIndex++){
+										let stop = yield curPath[nodeIndex]; // return the current path 
+										if(stop === true) // if the messeage send back is to stop
+												return null; // stop generation
 								}
-						})
-						.catch(err => console.log(err))
+						}
+				}
+				return null; // reached the end
+		}
+
+
+		const bridgeGap = async (start, end, paths) => {
+				/* gets a set of indexes indicating the gap, 
+				 * make fetch request to attempt to find a 
+				 * conncetion */
+				/* generator fuction for trying node to  find a bridge*/
+				
+				console.log(start)
+				console.log(end)
+				console.log(paths)
+				let leftPath = paths[start-1];
+				// last word in the left side path
+				let lastWord = leftPath[leftPath.length-1].word;
+				// if there exacly one gap, dont bother chechi
+				//let index = (end-start > 1)? 0 : 1; 
+				let gen = generateSequence(start, end, paths);
+				let curIter = gen.next();
+				const foundBridge = (response) =>{
+						if(response.detail === "Path not found."){ 
+								curIter = gen.next(); // get the next node
+						}else{
+								paths[start] = response; //set the bridge
+								curIter = gen.next(true); //break loop
+						}
+				}
+						 
+				while(!curIter.done){ // while the bridge is not been found
+						console.log(curIter.value.word);
+						await fetch(API_ENDPOINT+'path/'+lastWord+"/"+ curIter.value.word)
+								.then( response => response.json())
+								.then( response => processPath(response))
+								.then( foundBridge )
+								.catch(err => console.log(err))
 				}
 		}
 		let gaps = getGaps(paths);
 		await Promise.all(gaps.map( gap => bridgeGap(gap.start, gap.end, paths)))
-		return paths
+		return paths;
 }
 
 
+/* get a list of paths of words, joins them together 
+ * and dipatches it to state*/
 const dispatchPath = (paths, state, dispatchState) => {
-		// paths all list together
+		console.log(paths)
 		let finalPath = [];
-		paths = paths.filter( Boolean );
-		paths.forEach(path => finalPath.push(...path)) // add all paths together
-		console.log(finalPath)
-		finalPath.forEach((node, index) => 
-				timelyDispatch(() => {  
-						console.log(state.isEmpty)
-						if(index === 0){ 
-								// if this is the first node
-								dispatchState({
+		paths = paths.filter( Boolean ); // filter any null chars
+		// add all paths together
+		paths.forEach(path => finalPath.push(...path)) 
+		//console.log(finalPath)
+		finalPath.forEach((node, index) =>//for every node in final path
+				timelyDispatch(() => { // dispath in a timely order
+						//console.log(state.isEmpty)
+						if(index === 0){ // if this is the first node
+								dispatchState({ //dipatch as new node
 										type: 'SET_NEW_NODE', 
-										payload: node,
-								})
-						}else{
-								console.log(node.prevNode)
-								console.log(" --> ")
-								console.log(node.id)
-								console.log("\n")
-								//if there is already other nodes
-								let msg = {
+										payload: node, })
+						}else{ // is not first node
+								//console.log(node.prevNode)
+								//console.log(" --> ")
+								//console.log(node.id)
+								//console.log("\n")
+								dispatchState({ //if append a node list
 										type: 'SET_PATH_NODE', 
 										payload: { 
 												node: node,
@@ -223,143 +302,45 @@ const dispatchPath = (paths, state, dispatchState) => {
 														source: node.prevNode, 
 												}
 										}
-								}
-								dispatchState(msg)
+								})
 						}
-				}, 1,0)
-		) //se the time as 25 and the random to 0
+				})
+		)
 }
 
-
+/* gets passesed a set of two words, 
+ * queries the server for the path and 
+ * dispateches the result to state */
 const queryPath = async (words, state, dispatchState) => {
-		/* gets passesed a set of two words, 
-		 * queries the server for the path and 
-		 * dispateches the result to state */
-		//split words into arrays
-		words = await getFoundWords(words, dispatchState)
-				.catch(err => { dispatchState({
-						type:'SET_ERROR', 
-						payload:"Could not get words"})
-				});
+		//first remove all words from the input which are not in api
+		words = await removeNotFoundWords(words, dispatchState)
+				.catch(err =>  //catch error is could not fetch
+						dispatchState({
+								type:'SET_ERROR', 
+								payload:"Could not get words"}));
+		// get the list of words and return them in pair
+		// w1, w2, w3, w4 => (w1, w2), (w2, w3), (w3, w4)
 		let pathRequests = pairUp(words)
+		// for every pair of words query the api for a path between them
 		let pathParts = await fetchPathsParts(pathRequests, dispatchState)
-				.catch(err => {dispatchState({
+				.catch(err => 
+						dispatchState({
+								type:'SET_ERROR', //catch error is could not fetch
+								payload: "could not get paths"}));
+		// get the final path and attempt to cannect them together
+		// to form one cohesive path
+		let finalPath = await amendPath(pathParts)
+		.catch(err => 
+				dispatchState({
 						type:'SET_ERROR', 
-						payload: "could not get paths"} 
-				)})
-		console.log(pathParts);
-		let finalPaths = await amendPath(pathParts)
-				.catch(err => {dispatchState({
-						type:'SET_ERROR', 
-						payload: "Could not amend path"} 
-				)})
-		dispatchPath(finalPaths, state, dispatchState);
-		
-		
-		//let first = words[i];
-		//let second = words[i+1];
-		//console.log(first)
-		//console.log(second)
-		//let request = fetch(API_ENDPOINT+'path/'+ first +"/"+second)
-		//let result = request.json(); // unpack json
-		//if(result.detail === "Path not found."){
-		//console.log("path not found")
-		//}
-
-		/*
-		 *
-								console.log("this ran")
-						let prevNode = null;
-						let first;
-						let second;
-
-		for( var i = 0; i+1 <= words.length-1; i++){
-				first = words[i];
-				second = words[i + 1];
-				//console.log(words)
-				//console.log(i)
-				console.log(first);
-				console.log(second);
-				fetch(API_ENDPOINT + 'path/' +  first  + "/" + second) 
-						.then(result => result.json()) // unpack json
-						.then(nodes => {console.log(nodes); return nodes })
-						.then(nodes => catchError(nodes, state, dispatchState)) 
-							//check if words not found
-						.then(pathNodes => {
-								//console.log(pathNodes)
-								pathNodes.forEach((node, index) => 
-										timelyDispatch(() => {  
-												node = processNode(node);
-												if (prevNode === null){ 
-														// if this is the first node
-														dispatchState({
-																type: 'SET_NEW_NODE', 
-																payload: node,
-														})
-												}else{
-														console.log(prevNode.id)
-														console.log(" --> ")
-														console.log(node.id)
-														console.log("\n")
-														//if there is already other nodes
-														dispatchState({
-																type: 'SET_PATH_NODE', 
-																payload: { 
-																		node: node,
-																		link: { 
-																				source: prevNode.id, 
-																				target: node.id 
-																		}
-																}
-														})
-												}
-												prevNode = node;
-										}, 25,0)
-								) //se the time as 25 and the random to 0
-						})
-						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
-		}
-		*/
+						payload: "Could not amend path"}))
+		dispatchPath(finalPath, state, dispatchState)
+		// dispatch the ammedned path to state to be graphed
 }
 
 
-const queryAdjecentNodes = (node, state, dispatchState) => {
-		/* for every node request the adjecent node to it */
-		let linkAll = state.isDeepLinks;
-		// define whether we should link te deeper
-		let graph_type = 'synonyms/';
-		// define which type of graph we are requesting
-		fetch(API_ENDPOINT + graph_type + node.id )
-		// request the synonyms
-				.then(result => result.json())
-				.then(result => catchError(result, state, dispatchState))
-				.then(adjNodes => adjNodes.forEach( 
-						// for every node in the array
-						adjNode => timelyDispatch(() => {  
-								//for each of the nodes in the list 		
-								adjNode = processNode(adjNode); //process node 
-								if(linkAll || isNewNode(adjNode.id, state)){
-										// proces is it is new node, or deep link set
-										dispatchState({
-												type: 'SET_NODE_LINK', 
-												payload: { 
-														node: adjNode,
-														link: { 
-																source: node.id ,  
-																target: adjNode.id 
-														}
-												}
-										})
-
-								}
-						})
-						
-				))
-				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
-}
-
-const catchError = (response, state, dispatchState) =>{
-		/* Set error to state when user search a word not found */
+/* Set error to state when user search a word not found */
+const catchError = (response, state, dispatchState) => {
 		//console.log("got to cath error:")
 		//console.log(response)
 		if(response instanceof Array){
@@ -389,9 +370,7 @@ const catchError = (response, state, dispatchState) =>{
 								type: 'SET_PATH_NOT_FOUND', 
 								payload: { 
 										'first': response.first,
-										'last': response.last,
-								}
-						})
+										'last': response.last, }})
 						throw new Error("path not found");
 				}else{
 						return response

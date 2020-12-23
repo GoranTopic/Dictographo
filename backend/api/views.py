@@ -171,8 +171,8 @@ class QuerySearchDetail(generics.ListAPIView):
         # filter words which we don't want to suggest
         queried_list = list(filter(self.filterSuggestion, queried_list))
         # only get the first 15 words
-        if len(queried_list) > 15: 
-                queried_list = queried_list[:15]
+        if len(queried_list) > 50: 
+                queried_list = queried_list[:50]
         # pass thru the serilizer as many 
         serializer = self.get_serializer(queried_list, many=True)
         # tranfer as json 
