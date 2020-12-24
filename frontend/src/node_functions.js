@@ -147,14 +147,18 @@ const removeNotFoundWords = async (words, dispatchState) => {
 		return foundWords.filter( Boolean )
 }
 
-/* add for each node in the path where it comming from */
-const processPath = (path) =>{
+/* add foreach node in the path where it comming from,
+		* also adds the color to be graphed */
+const processPath = (path, request) =>{
 		let prevNode = null; //declare prev node
 		if(path instanceof Array){ // only if it is a list 
 				path.forEach((node) => { 
 						node = processNode(node); //might as well process node 
 						// set the previous node if there was a previous one
 						node['prevNode'] = (prevNode)? prevNode : node.id;
+						// colo if it is reuested
+						if(node.word === request.first || node.word === request.last)
+								node['color'] = colors.node.selected // color as selected
 						// if it is start of path set first previous to itself
 						prevNode = node.id;
 				})
@@ -166,12 +170,13 @@ const processPath = (path) =>{
 /* gets a list of pair request for paths an queryes the api 
  * then is saves those paths in a order list and returns*/
 const fetchPathsParts = async (pathRequests, dispatchState) => {
+		// make an empty array of the same length as request paths
 		var paths = new Array(pathRequests.length)
-		await Promise.all( 
+		await Promise.all( //wait for all promises to return 
 				pathRequests.map((request, index) =>
 						fetch(API_ENDPOINT+'path/'+request.first+"/"+request.last)
 						.then( response => response.json())
-						.then( response => processPath(response))
+						.then( response => processPath(response, request))
 						.then( response => { 
 								if(response.detail === "Path not found."){ 
 										dispatchState({
@@ -188,7 +193,11 @@ const fetchPathsParts = async (pathRequests, dispatchState) => {
 }
 
 const amendPath = async (paths) => {
+		/* takes a list of paths and is there
+		 * is a gap tries to find a connecting path*/
 		const getGaps = (paths) => {
+				/* takes a list of paths retusn a list of 
+				 * indexes where the gaps are*/
 				let gaps = [];
 				let gap = {start:null, end:null}
 				let wasPath = false;
@@ -213,7 +222,9 @@ const amendPath = async (paths) => {
 				return gaps;
 		}
 
-		function* generateSequence(start, end, paths) {
+		function* nextNodeGenerator(start, end, paths) {
+				/* makes a generator to go thought the nodes
+				 * which must try to find a bridge*/
 				// for every path left in paths
 				for(let pathIndex = end; pathIndex < paths.length; pathIndex++){
 						let curPath = paths[pathIndex]
@@ -237,16 +248,12 @@ const amendPath = async (paths) => {
 				 * make fetch request to attempt to find a 
 				 * conncetion */
 				/* generator fuction for trying node to  find a bridge*/
-				
-				console.log(start)
-				console.log(end)
-				console.log(paths)
 				let leftPath = paths[start-1];
 				// last word in the left side path
 				let lastWord = leftPath[leftPath.length-1].word;
 				// if there exacly one gap, dont bother chechi
 				//let index = (end-start > 1)? 0 : 1; 
-				let gen = generateSequence(start, end, paths);
+				let gen = nextNodeGenerator(start, end, paths);
 				let curIter = gen.next();
 				const foundBridge = (response) =>{
 						if(response.detail === "Path not found."){ 
@@ -258,7 +265,6 @@ const amendPath = async (paths) => {
 				}
 						 
 				while(!curIter.done){ // while the bridge is not been found
-						console.log(curIter.value.word);
 						await fetch(API_ENDPOINT+'path/'+lastWord+"/"+ curIter.value.word)
 								.then( response => response.json())
 								.then( response => processPath(response))
@@ -275,9 +281,9 @@ const amendPath = async (paths) => {
 /* get a list of paths of words, joins them together 
  * and dipatches it to state*/
 const dispatchPath = (paths, state, dispatchState) => {
-		console.log(paths)
-		let finalPath = [];
-		paths = paths.filter( Boolean ); // filter any null chars
+		let finalPath = []; // declare final array
+		//if( paths isIntanceof Array) return null;
+				paths = paths.filter( Boolean ); // filter any null chars
 		// add all paths together
 		paths.forEach(path => finalPath.push(...path)) 
 		//console.log(finalPath)
@@ -289,10 +295,6 @@ const dispatchPath = (paths, state, dispatchState) => {
 										type: 'SET_NEW_NODE', 
 										payload: node, })
 						}else{ // is not first node
-								//console.log(node.prevNode)
-								//console.log(" --> ")
-								//console.log(node.id)
-								//console.log("\n")
 								dispatchState({ //if append a node list
 										type: 'SET_PATH_NODE', 
 										payload: { 
@@ -320,7 +322,7 @@ const queryPath = async (words, state, dispatchState) => {
 								payload:"Could not get words"}));
 		// get the list of words and return them in pair
 		// w1, w2, w3, w4 => (w1, w2), (w2, w3), (w3, w4)
-		let pathRequests = pairUp(words)
+		let pathRequests = pairUp(words);
 		// for every pair of words query the api for a path between them
 		let pathParts = await fetchPathsParts(pathRequests, dispatchState)
 				.catch(err => 

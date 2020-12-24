@@ -31,7 +31,7 @@ const colors = {
 		link:{
 				default: 'rgba(23,162,184,50%)', //bootstrap faded info blue
 				gray: '#D1D0CE', // gray goose
-				onPath: '#990012', // Red wine
+				onPath: 'rgba(153,0,18, 70%)', // faded Red wine
 				highlight: '#E41B17', // red
 				antonim: '',
 		},
@@ -43,9 +43,9 @@ const colors = {
 const  graphConfig = {
 		"automaticRearrangeAfterDropNode": false,
 		"collapsible": false,
-		"directed": false,
+		"directed": true,
 		"focusAnimationDuration": 0.75,
-		"backgroundColor": "black",
+		"backgroundColor": "white",
 		"focusZoom": 1,
 		"height": height - 87,
 		"width": width - 15,
@@ -62,7 +62,7 @@ const  graphConfig = {
 				"alphaTarget": 0.3,
 				"gravity": -140,
 				"linkLength": 3,
-				"linkStrength": 2,
+				"linkStrength": 1,
 				"disableLinkForce": false
 		},
 		"node": {
@@ -99,9 +99,8 @@ const  graphConfig = {
 				"renderLabel": true,
 				"semanticStrokeWidth": false,
 				"strokeWidth": 1.5,
-				"markerHeight": 6,
-				"markerWidth": 6
-
+				"markerHeight": 3,
+				"markerWidth": 20,
 		}
 };
 

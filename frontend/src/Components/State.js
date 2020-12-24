@@ -60,8 +60,8 @@ const stateReducer = (state, action) =>{
 				case 'SET_PATH_NODE':
 						return {
 								...state,
-								nodes: [ ...state.nodes, { ...action.payload.node, selected: true, color: colors.node.selected } ],
-								links: [ ...state.links, { ...action.payload.link, color: colors.node.selected } ],
+								nodes: [ ...state.nodes, { ...action.payload.node, selected: true, }],
+								links: [ ...state.links, { ...action.payload.link, color: colors.link.onPath } ],
 								selected: action.payload.node, // save as selected
 								definedNode: action.payload.node, // save as a definietion 
 								isEmpty: false,

@@ -67,8 +67,7 @@ function NavBarContainer({ state, dispatchState }){
 						</Navbar.Brand>
 						<SuggestionsContainer
 								state={state}
-								dispatchState={dispatchState}
-						>
+								dispatchState={dispatchState} >
 								<InputGroup  size='lg' md='auto' className="mx-3" style={{maxWidth: "600px"}} >
 										<FormControl size="lg" as='input' type="text" placeholder="Write some words..." 
 												value={state.searchTerm} onChange={handleSearchChange} />
