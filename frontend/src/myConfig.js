@@ -2,7 +2,7 @@
 // that you want to override, otherwise default ones will be used
 // Also misc. settings
 
-const DEBUGGING = false
+const DEBUGGING = true
 
 const API_ENDPOINT = DEBUGGING ? 
 	'http://127.0.0.1:8000/api/' :  //debuging local

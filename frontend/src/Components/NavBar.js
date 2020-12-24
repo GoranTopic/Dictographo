@@ -6,10 +6,11 @@ import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup } from 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon  } from '@fortawesome/react-fontawesome'
 import { faSlidersH } from '@fortawesome/free-solid-svg-icons'
+
 /*
- * =======================================
+ * ===========================================
  *      NavBar Componente for React 
- * =======================================
+ * ===========================================
  * 	 Using ReaactBootStrap to render the navbar
  */
 
@@ -69,7 +70,7 @@ function NavBarContainer({ state, dispatchState }){
 								dispatchState={dispatchState}
 						>
 								<InputGroup  size='lg' md='auto' className="mx-3" style={{maxWidth: "600px"}} >
-										<FormControl size="lg" as='input' type="text" placeholder="Write some words here..." 
+										<FormControl size="lg" as='input' type="text" placeholder="Write some words..." 
 												value={state.searchTerm} onChange={handleSearchChange} />
 										<InputGroup.Append>
 												<Button size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
