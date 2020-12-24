@@ -53,20 +53,20 @@ const queryNewWord = (word, state, dispatchState) => {
 		fetch(API_ENDPOINT + word) // fetch word
 				.then(result => //unpack node
 						result.json())
-				.then(result => //check if word was found
-						catchError(result, state, dispatchState)) 
-				.then(result => //process node
-						processNode(result)) 
-				.then(node => { //dispatch as new word
-						dispatchState({
-								type: 'SET_NEW_NODE', 
-								payload: node
-						}); 
-						return node; })
+						.then(result => //check if word was found
+								catchError(result, state, dispatchState)) 
+						.then(result => //process node
+								processNode(result)) 
+						.then(node => { //dispatch as new word
+								dispatchState({
+										type: 'SET_NEW_NODE', 
+										payload: node
+								}); 
+								return node; })
 				.then(node => // get the surrounding words
 						queryAdjecentNodes(node, state, dispatchState))
-				.catch(() => 
-						dispatchState({type:'SET_FETCH_FAILED'}));
+						.catch(() => 
+								dispatchState({type:'SET_FETCH_FAILED'}));
 }
 
 /* Fetch all the adjancent node of a given node and dispatch */
