@@ -1,7 +1,7 @@
 import React  from 'react';
-//import { Graph } from "react-d3-graph";
+import { Graph } from "react-d3-graph";
 import { onClickNode } from '../node_functions';
-//import { graphConfig }  from "../myConfig";
+import { graphConfig }  from "../myConfig";
 import ForceGraph2D from 'react-force-graph-2d';
 //import ForceGraph3D from 'react-force-graph-3d';
 //import ForceGraphVR from 'react-force-graph-vr';
@@ -21,40 +21,48 @@ function GraphContainer({state, dispatchState}){
 				useCallback
 		} = React;
 
-		const DynamicGraph = () => {
 
-
-				const handleClick = useCallback(
-						(nodeId) => onClickNode(nodeId, state, dispatchState)
-						, []);
+		const handleClick = useCallback( // handle click of node
+				(nodeId) => onClickNode(nodeId, state, dispatchState)
+				, [state, dispatchState]);
 								
-				return <ForceGraph2D
-						enableNodeDrag={true}
-						onNodeClick={handleClick}
-						graphData={state}
-				/>;
-		};
-		return (
-				<div style={{backgroundImage: 'url(./grid.png)'}} >
-						<DynamicGraph />,
-				</div>
-		)
-}
-export default GraphContainer;
+				
+		const chosenGraph = (type) =>{ 
+				switch(type) {
+						case '3d':
+								return <Graph 
+										id="graph-id" 
+										// id is mandatory, 
+										// if no id is defined rd3g will throw an error
+										data={state}
+										config={graphConfig}
+										onClickNode={handleClick}
+										backgroundColor="black"
+								/>
+						case 'force2D':
+								return <ForceGraph2D
+										enableNodeDrag={true}
+										onNodeClick={handleClick}
+										graphData={state}
+								/>;
+						default:
+								return <Graph 
+										id="graph-id" 
+										// id is mandatory, 
+										// if no id is defined rd3g will throw an error
+										data={state}
+										config={graphConfig}
+										onClickNode={handleClick}
+										backgroundColor="black"
+								/>
+				} 
+		}
 
-		// redifine the function inside this context 
-		/*
-		let onClickNode_func =
-				(nodeId) => onClickNode(nodeId, state, dispatchState);
-		return(
-				<div style={{backgroundImage: 'url(./grid.png)'}} >
-						<Graph 
-								id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
-								data={state}
-								config={graphConfig}
-								onClickNode={onClickNode_func}
-								backgroundColor="black"
-						/>
-				</div>
-		)
-		*/
+
+		return <div style={{backgroundImage: 'url(./grid.png)'}} >
+				{chosenGraph(state.graphType)}
+		</div>
+		
+}
+
+export default GraphContainer;

@@ -6,6 +6,7 @@ const initial_state = {
 		links: [],
 		selected:{},
 		definedNode:{},
+		graphType : '3d',
 		isError: false,
 		errorMsg: "",
 		isFetchFailed: false,
