@@ -1,5 +1,5 @@
 import React  from 'react';
-import { Alert } from 'react-bootstrap';
+import { Alert, ProgressBar } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 /*
@@ -11,10 +11,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function AlertContainer({state, dispatchState}) {
 		/* functions that return an error mesage depending onthe state */
+		// set counter ro dismiss with hook
+
 		if (state.isError) {
 				return(
 						<Alert variant="danger" dismissible 
 								onClose={() => dispatchState({type: 'DISSMISS_ERROR'})} >
+								<ProgressBar variant="danger" now={80} />
 								<Alert.Heading>Oh Snap!</Alert.Heading>
 								{state.isWordNotFound? //if the there is not words found
 								<p>Looks like <b>

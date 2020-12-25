@@ -2,7 +2,7 @@ import React from 'react';
 import { queryNewWord, queryPath } from '../node_functions';
 import { colors }  from "../myConfig";
 import SuggestionsContainer from "./SearchSuggestion/SearchSuggestion";
-import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup } from 'react-bootstrap';
+import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup, Col, Row } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon  } from '@fortawesome/react-fontawesome'
 import { faSlidersH } from '@fortawesome/free-solid-svg-icons'
@@ -44,6 +44,9 @@ function NavBarContainer({ state, dispatchState }){
 				return string.replace(/  +/g, ' ').trim().split(' ') 
 		}
 
+		const handleRadioGraphChange = (changeEvent) => 
+				dispatchState({type:'SET_GRAPH_TYPE', payload:changeEvent.target.value});
+
 		const handleToggleDeepLinks = () => {
 				/* hangles the toggle of the deep links, 
 				 * resets the graph if there is already a 
@@ -82,6 +85,37 @@ function NavBarContainer({ state, dispatchState }){
 												size="lg" title="Options" 
 												icon={<FontAwesomeIcon icon={faSlidersH}/>}
 												id="basic-nav-dropdown">
+												<Form.Group as={Row} variant="dark" >
+														<Col md={40}>
+																<Form.Check
+																		type="radio"
+																		label="d3"
+																		value="d3"
+																		name="formHorizontalRadios"
+																		id="formHorizontalRadios1"
+																		checked={state.graphType === "d3"}
+																		onChange={handleRadioGraphChange}
+																/>
+																<Form.Check
+																		type="radio"
+																		label="2D"
+																		value="2D"
+																		name="formHorizontalRadios"
+																		id="formHorizontalRadios2"
+																		checked={state.graphType === "2D"}
+																		onChange={handleRadioGraphChange}
+																/>
+																<Form.Check
+																		type="radio"
+																		label="3D"
+																		value="3D"
+																		name="formHorizontalRadios"
+																		id="formHorizontalRadios3"
+																		checked={state.graphType === "3D"}
+																		onChange={handleRadioGraphChange}
+																/>
+														</Col>
+												</Form.Group>
 												<NavDropdown.Divider />
 												<Form.Check type="switch" id="custom-switch" label="Deep Links"
 														value={state.isDeepLinks} 

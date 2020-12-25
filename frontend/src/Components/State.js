@@ -165,6 +165,11 @@ const stateReducer = (state, action) =>{
 								isError: true,
 								isFetchFailed: true,
 						};
+				case 'SET_GRAPH_TYPE':
+						return {
+								...state,
+								graphType: action.payload,
+						};
 				case 'SET_ERROR':
 						return {
 								...state,

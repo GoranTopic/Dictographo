@@ -3,7 +3,7 @@ import { Graph } from "react-d3-graph";
 import { onClickNode } from '../node_functions';
 import { graphConfig }  from "../myConfig";
 import ForceGraph2D from 'react-force-graph-2d';
-//import ForceGraph3D from 'react-force-graph-3d';
+import ForceGraph3D from 'react-force-graph-3d';
 //import ForceGraphVR from 'react-force-graph-vr';
 //import ForceGraphAR from 'react-force-graph-ar';
 
@@ -39,8 +39,14 @@ function GraphContainer({state, dispatchState}){
 										onClickNode={handleClick}
 										backgroundColor="black"
 								/>
-						case 'force2D':
+						case '2D':
 								return <ForceGraph2D
+										enableNodeDrag={true}
+										onNodeClick={handleClick}
+										graphData={state}
+								/>;
+						case '3D':
+								return <ForceGraph3D
 										enableNodeDrag={true}
 										onNodeClick={handleClick}
 										graphData={state}
