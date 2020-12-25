@@ -203,8 +203,8 @@ const amendPath = async (paths) => {
 				let wasPath = false;
 				let wasGap = false;
 				paths.forEach((path, index) => { // fi found gap
-						if(path === null || index === 0){// or is frist index
-								if(wasPath){  // comes from gap
+						if(path === null){// or is frist index
+								if(wasPath || index === 0){  // comes from gap
 										gap.start = index //save start
 								}
 								// and comes from path
