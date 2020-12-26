@@ -79,48 +79,52 @@ function NavBarContainer({ state, dispatchState }){
 										</InputGroup.Append>
 								</InputGroup>
 						</SuggestionsContainer>
-						<Navbar.Collapse id="basic-navbar-nav">
-								<Nav className="ml-auto mx-4">
-										<NavDropdown variant="dark"
-												size="lg" title="Options" 
+						<Navbar.Collapse id="basic-navbar-nav"
+								style={{color: colors.black}} 
+						>
+								<Nav
+										className="pl-3 pull-right mw-50 text-center"
+								>
+										<NavDropdown 
+												title="Options" 
 												icon={<FontAwesomeIcon icon={faSlidersH}/>}
-												id="basic-nav-dropdown">
-												<Form.Group as={Row} variant="dark" >
-														<Col md={40}>
-																<Form.Check
-																		type="radio"
-																		label="d3"
-																		value="d3"
-																		name="formHorizontalRadios"
-																		id="formHorizontalRadios1"
-																		checked={state.graphType === "d3"}
-																		onChange={handleRadioGraphChange}
-																/>
-																<Form.Check
-																		type="radio"
-																		label="2D"
-																		value="2D"
-																		name="formHorizontalRadios"
-																		id="formHorizontalRadios2"
-																		checked={state.graphType === "2D"}
-																		onChange={handleRadioGraphChange}
-																/>
-																<Form.Check
-																		type="radio"
-																		label="3D"
-																		value="3D"
-																		name="formHorizontalRadios"
-																		id="formHorizontalRadios3"
-																		checked={state.graphType === "3D"}
-																		onChange={handleRadioGraphChange}
-																/>
-														</Col>
+												style={{backgroundColor: colors.black }} 
+												className="w-responsive text-center mx-auto w-100 p-3 mt-2"
+										>
+												<Form.Group as={Col} 
+																className="mw-50 text-center"
+												>
+														<Form.Check
+																type="switch"
+																label="d3 Graph"
+																value="d3"
+																name="formHorizontalRadios"
+																id="d3"
+																checked={state.graphType === "d3"}
+																onChange={handleRadioGraphChange}/ >
+														<Form.Check
+																type="switch"
+																label="2D Graph"
+																value="2D"
+																name="formHorizontalRadios"
+																id="formHorizontalRadios2"
+																checked={state.graphType === "2D"}
+																onChange={handleRadioGraphChange} />
+														<Form.Check
+																type="switch"
+																label="3D Graph"
+																value="3D"
+																name="formHorizontalRadios"
+																id="formHorizontalRadios3"
+																checked={state.graphType === "3D"}
+																onChange={handleRadioGraphChange}
+														/>
+														<NavDropdown.Divider />
+														<Form.Check type="switch" id="custom-switch" label="Deep Links"
+																value={state.isDeepLinks} 
+																onChange={handleToggleDeepLinks}
+														/>
 												</Form.Group>
-												<NavDropdown.Divider />
-												<Form.Check type="switch" id="custom-switch" label="Deep Links"
-														value={state.isDeepLinks} 
-														onChange={handleToggleDeepLinks}
-												/>
 										</NavDropdown>
 								</Nav>
 						</Navbar.Collapse>
