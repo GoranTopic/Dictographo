@@ -65,37 +65,33 @@ function NavBarContainer({ state, dispatchState }){
 										height="70"
 										alt="React Bootstrap logo" />
 						</a>
-						<Navbar.Brand href="index.html" className="row"  >
+						<Navbar.Brand href="index.html" className="row pr-2"  >
 								<h1>Dictographo</h1>
 						</Navbar.Brand>
 						<SuggestionsContainer
 								state={state}
 								dispatchState={dispatchState} >
-								<InputGroup  size='lg' md='auto' className="mx-3" style={{maxWidth: "600px"}} >
+								<InputGroup  size='lg' md='auto' style={{maxWidth: "600px"}} >
 										<FormControl size="lg" as='input' type="text" placeholder="Write some words..." 
 												value={state.searchTerm} onChange={handleSearchChange} />
-										<InputGroup.Append>
+										<InputGroup.Append className="pr-2" >
 												<Button size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
 										</InputGroup.Append>
 								</InputGroup>
 						</SuggestionsContainer>
-						<Navbar.Collapse id="basic-navbar-nav"
-								style={{color: colors.black}} 
-						>
-								<Nav
-										className="pl-3 pull-right mw-50 text-center"
-								>
+						<Navbar.Toggle aria-controls="responsive-navbar-nav" />
+						<Navbar.Collapse id="basic-navbar-nav" >
+								<Nav >
 										<NavDropdown 
 												title="Options" 
 												icon={<FontAwesomeIcon icon={faSlidersH}/>}
 												style={{backgroundColor: colors.black }} 
-												className="w-responsive text-center mx-auto w-100 p-3 mt-2"
+												className="text-center ml-3 pl-3"
 										>
-												<Form.Group as={Col} 
-																className="mw-50 text-center"
-												>
+												<Form.Group as={Col}>
 														<Form.Check
 																type="switch"
+																className="pb-1 text-center"
 																label="d3 Graph"
 																value="d3"
 																name="formHorizontalRadios"
@@ -104,6 +100,7 @@ function NavBarContainer({ state, dispatchState }){
 																onChange={handleRadioGraphChange}/ >
 														<Form.Check
 																type="switch"
+																className="pb-1 text-center"
 																label="2D Graph"
 																value="2D"
 																name="formHorizontalRadios"
@@ -112,6 +109,7 @@ function NavBarContainer({ state, dispatchState }){
 																onChange={handleRadioGraphChange} />
 														<Form.Check
 																type="switch"
+																className="pb-1 text-center"
 																label="3D Graph"
 																value="3D"
 																name="formHorizontalRadios"
@@ -120,7 +118,11 @@ function NavBarContainer({ state, dispatchState }){
 																onChange={handleRadioGraphChange}
 														/>
 														<NavDropdown.Divider />
-														<Form.Check type="switch" id="custom-switch" label="Deep Links"
+														<Form.Check 
+																type="switch" 
+																className="text-center"
+																id="custom-switch" 
+																label="Deep Links"
 																value={state.isDeepLinks} 
 																onChange={handleToggleDeepLinks}
 														/>
