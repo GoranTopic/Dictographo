@@ -2,7 +2,7 @@ import React from 'react';
 import { queryNewWord, queryPath } from '../node_functions';
 import { colors }  from "../myConfig";
 import SuggestionsContainer from "./SearchSuggestion/SearchSuggestion";
-import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup, Col, Row } from 'react-bootstrap';
+import { Nav, Navbar, NavDropdown, Form, FormControl, Button, InputGroup, Col } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon  } from '@fortawesome/react-fontawesome'
 import { faSlidersH } from '@fortawesome/free-solid-svg-icons'
@@ -65,13 +65,13 @@ function NavBarContainer({ state, dispatchState }){
 										height="70"
 										alt="React Bootstrap logo" />
 						</a>
-						<Navbar.Brand href="index.html" className="row pr-2"  >
+						<Navbar.Brand href="index.html" className="row"  >
 								<h1>Dictographo</h1>
 						</Navbar.Brand>
 						<SuggestionsContainer
 								state={state}
 								dispatchState={dispatchState} >
-								<InputGroup  size='lg' md='auto' style={{maxWidth: "600px"}} >
+								<InputGroup  size='lg' md='auto' className="pl-3" style={{maxWidth: "700px"}} >
 										<FormControl size="lg" as='input' type="text" placeholder="Write some words..." 
 												value={state.searchTerm} onChange={handleSearchChange} />
 										<InputGroup.Append className="pr-2" >

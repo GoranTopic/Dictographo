@@ -30,6 +30,8 @@ function GraphContainer({state, dispatchState}){
 		const chosenGraph = (type) =>{ 
 				switch(type) {
 						case '3d':
+								dispatchState({type: 'CLEAR_LINKS'});
+								console.log(state)
 								return <Graph 
 										id="graph-id" 
 										// id is mandatory, 
@@ -40,18 +42,21 @@ function GraphContainer({state, dispatchState}){
 										backgroundColor="black"
 								/>
 						case '2D':
+								console.log(state)
 								return <ForceGraph2D
 										enableNodeDrag={true}
 										onNodeClick={handleClick}
 										graphData={state}
 								/>;
 						case '3D':
+								console.log(state)
 								return <ForceGraph3D
 										enableNodeDrag={true}
 										onNodeClick={handleClick}
 										graphData={state}
 								/>;
 						default:
+								console.log(state)
 								return <Graph 
 										id="graph-id" 
 										// id is mandatory, 

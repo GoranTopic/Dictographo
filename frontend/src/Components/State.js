@@ -6,7 +6,7 @@ const initial_state = {
 		links: [],
 		selected:{},
 		definedNode:{},
-		graphType : 'd3',
+		graphType : '2D',
 		isError: false,
 		errorMsg: "",
 		isFetchFailed: false,
@@ -42,6 +42,11 @@ const stateReducer = (state, action) =>{
 								...state, 
 								nodes: [ ...state.nodes, action.payload.node ],
 								links: [ ...state.links, action.payload.link ]
+						};
+				case 'CLEAR_LINKS':
+						return { 
+								...state, 
+								links: [],
 						};
 				case 'SET_STATE':
 						return { 

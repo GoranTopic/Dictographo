@@ -13,6 +13,7 @@ function AlertContainer({state, dispatchState}) {
 		/* functions that return an error mesage depending onthe state */
 		// set counter ro dismiss with hook
 
+
 		if (state.isError) {
 				return(
 						<Alert variant="danger" dismissible 

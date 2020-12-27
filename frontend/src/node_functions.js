@@ -270,9 +270,9 @@ const amendPath = async (paths) => {
 						 
 				while(!curIter.done){ // while the bridge is not been found
 						await fetch(API_ENDPOINT+'path/'+lastWord+"/"+ curIter.value.word)
-								.then( response => response.json())
-								.then( response => processPath(response))
-								.then( foundBridge )
+								.then(response => response.json())
+								.then(response => processPath(response))
+								.then(foundBridge )
 								.catch(err => console.log(err))
 				}
 		}
