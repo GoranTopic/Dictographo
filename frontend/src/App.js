@@ -15,12 +15,16 @@ function App() {
 						<NavBarContainer 
 								state={state}
 								dispatchState={dispatchState} />
-						<AlertContainer
-								state={state}
-								dispatchState={dispatchState} />
+						{state.isError? 
+								<AlertContainer
+										state={state}
+										dispatchState={dispatchState} />
+										:
+										<></>}
 						{ state.isEmpty? 
 								<CarouselContainer/>
-								: <div style={{display: 'inline',}}>
+								: 
+								<div style={{display: 'inline',}}>
 										<SideBarContainer 
 												state={state}
 												dispatchState={dispatchState} />

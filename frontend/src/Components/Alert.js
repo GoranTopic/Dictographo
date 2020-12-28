@@ -1,4 +1,4 @@
-import React  from 'react';
+import React, { useState, useEffect } from 'react';
 import { Alert, ProgressBar } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -11,14 +11,31 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function AlertContainer({state, dispatchState}) {
 		/* functions that return an error mesage depending onthe state */
-		// set counter ro dismiss with hook
-
+		// set timer ro dismiss with hook
+		const [ percentage, setPercentange ] = useState(0)
+		// use effect to set the interval to make a contant preogress
+		//useEffect(() => setInterval( () => setPercentange(percentage+1), 2000), [percentage])
+		useEffect(() => {
+				let interval = null;
+				console.log(percentage);
+				if (percentage < 100 && state.isError) {
+						interval = setInterval(() => 
+								setPercentange(percentage => percentage + 1), 100);
+				} else{ // if it has reached 100 percent
+						console.log("clean up ran")
+						setPercentange(0); // set percentage back to 0
+						dispatchState({type: 'DISSMISS_ERROR' });
+				}
+				return () => {
+						clearInterval(interval);
+				}
+		}, [ percentage, dispatchState, state]);
 
 		if (state.isError) {
 				return(
 						<Alert variant="danger" dismissible 
 								onClose={() => dispatchState({type: 'DISSMISS_ERROR'})} >
-								<ProgressBar variant="danger" now={80} />
+								<ProgressBar variant="danger" now={percentage} />
 								<Alert.Heading>Oh Snap!</Alert.Heading>
 								{state.isWordNotFound? //if the there is not words found
 								<p>Looks like <b>
