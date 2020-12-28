@@ -15,12 +15,13 @@ function App() {
 						<NavBarContainer 
 								state={state}
 								dispatchState={dispatchState} />
-						{state.isError? 
+						{ state.isError? 
 								<AlertContainer
 										state={state}
 										dispatchState={dispatchState} />
 										:
-										<></>}
+										<></>
+						}
 						{ state.isEmpty? 
 								<CarouselContainer/>
 								: 
