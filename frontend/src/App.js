@@ -2,7 +2,7 @@ import { initial_state, stateReducer } from './Components/State';
 import CarouselContainer from './Components/Carousel';
 import SideBarContainer from './Components/SideBar';
 import NavBarContainer from './Components/NavBar';
-import GraphContainer from './Components/Graph';
+import GraphContainer from './Components/Graph/Graph';
 import AlertContainer from './Components/Alert';
 import React from 'react';
 import './App.css';
@@ -15,14 +15,14 @@ function App() {
 						<NavBarContainer 
 								state={state}
 								dispatchState={dispatchState} />
-						{ state.isError? 
+						{ state.isError?  // is ther is error mount Error
 								<AlertContainer
 										state={state}
 										dispatchState={dispatchState} />
 										:
 										<></>
 						}
-						{ state.isEmpty? 
+						{ state.isEmpty? // if there is a word
 								<CarouselContainer/>
 								: 
 								<div style={{display: 'inline',}}>

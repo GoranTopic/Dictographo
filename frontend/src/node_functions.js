@@ -32,6 +32,12 @@ const getNode = (nodeId, state) =>
 const isNewNode = (nodeId, state) => 
 		state.nodes.every( node => node.id !== nodeId )
 
+/* returns true link is not in state, 
+ * could import time complexity by using a hash table */
+const isNewLink = (source, target, state) => 
+		state.links.every( link => link.source !== source 
+				|| link.target !== target )
+
 /* when user clicks on a node, query adjacent nodes
  * and set node as selected */
 const onClickNode = (nodeId, state, dispatchState) => {
@@ -72,6 +78,7 @@ const queryNewWord = (word, state, dispatchState) => {
 /* Fetch all the adjancent node of a given node and dispatch */
 const queryAdjecentNodes = (node, state, dispatchState) => {
 		// define whether we should link te deeper
+		//console.log(node)
 		let linkAll = state.isDeepLinks;
 		// define which type of graph we are requesting
 		let graph_type = 'synonyms/';
@@ -86,8 +93,10 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 										adjNode => timelyDispatch(() => {// dispacth timely
 												// for each of the nodes in the list 		
 												adjNode = processNode(adjNode); //process node 
+												console.log(adjNode)
 												// proces is it is new node, or deep link set
-												if(linkAll || isNewNode(adjNode.id, state)){
+												if(isNewNode(adjNode.id, state)){
+														// if it is a new node append 
 														dispatchState({//dispatch node with link node
 																type: 'SET_NODE_LINK', 
 																payload: { 
@@ -98,11 +107,22 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 																		}
 																}
 														})
+												}else if(linkAll && isNewLink(node.id, adjNode.id, state)){
+														dispatchState({// if deep links is on , and it is a new node
+																type: 'SET_NEW_LINK', 
+																payload: { 
+																		source: node.id ,  
+																		target: adjNode.id 
+																}
+														})
 												}
 										})
-						
-				))
-				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
+								)
+						).then(()=>{
+								console.log("state after newqord query")
+								console.log(state)
+						})
+						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
 }
 
 
@@ -202,9 +222,9 @@ const amendPath = async (paths) => {
 				let gap = {start:null, end:null}
 				let wasPath = false;
 				let wasGap = false;
-				paths.forEach((path, index) => { // fi found gap
-						if(path === null){// or is frist index
-								if(wasPath || index === 0){  // comes from gap
+				paths.forEach((path, index) => {
+						if(path === null ){// if it is gap
+								if(wasPath){  // comes from gap
 										gap.start = index //save start
 								}
 								// and comes from path
@@ -248,11 +268,9 @@ const amendPath = async (paths) => {
 				 * make fetch request to attempt to find a 
 				 * conncetion */
 				/* generator fuction for trying node to  find a bridge*/
-				if(start === 0 ) return paths; // if it is the last node do nothing
-				// ge the previous path 
 				let leftPath = paths[start-1];
 				// last word in the left side path
-				let lastWord = leftPath[leftPath.length-1].word; 
+				let lastWord = leftPath[leftPath.length-1].word;
 				// if there exacly one gap, dont bother chechi
 				//let index = (end-start > 1)? 0 : 1; 
 				let gen = nextNodeGenerator(start, end, paths);
@@ -261,8 +279,6 @@ const amendPath = async (paths) => {
 						if(response.detail === "Path not found."){ 
 								curIter = gen.next(); // get the next node
 						}else{
-								//response.pop() // pop last input so that there are no inputs
-								//paths[start-1].pop() // avid diplucates
 								paths[start] = response; //set the bridge
 								curIter = gen.next(true); //break loop
 						}
@@ -270,9 +286,9 @@ const amendPath = async (paths) => {
 						 
 				while(!curIter.done){ // while the bridge is not been found
 						await fetch(API_ENDPOINT+'path/'+lastWord+"/"+ curIter.value.word)
-								.then(response => response.json())
-								.then(response => processPath(response))
-								.then(foundBridge )
+								.then( response => response.json())
+								.then( response => processPath(response))
+								.then( foundBridge )
 								.catch(err => console.log(err))
 				}
 		}

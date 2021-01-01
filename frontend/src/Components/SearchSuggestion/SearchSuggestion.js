@@ -73,9 +73,9 @@ function SuggestionsContainer(props){
 
 		const filterSuggestions = suggestions => 
 				/* filter out all words which have spaces */
-				suggestions.filter( suggestion => /\s/.test(suggestion))
+				suggestions instanceof Array ? // if reques has been found
+						suggestions.filter( suggestion => /\s/.test(suggestion)) : []
 
-		
 		const addToSearchTerm = (word) => {
 				/* append a given word to the seate searchTerm */
 				let wordList = state.searchTerm.split(" ");
@@ -89,9 +89,7 @@ function SuggestionsContainer(props){
 				setSelected(0); // reset selected
 		}
 
-
 		const onClick = (word) => addToSearchTerm(word);
-		
 
 		useEffect(() => {
 				/* query server for search suggestionsa
@@ -104,7 +102,6 @@ function SuggestionsContainer(props){
 				//fetch the last element 
 				fetch(API_ENDPOINT + query_search + last)
 						.then(result => result.json()) //unpack suggestions
-						.then(result => {console.log(result); return result}) //unpack suggestions
 						.then(suggestions => filterSuggestions(suggestions))
 						.then(suggestions => setSuggestions(suggestions))
 						.catch((err) => console.log(err));
@@ -112,7 +109,7 @@ function SuggestionsContainer(props){
 
 
 		const SuggestionList = () =>
-				<ul class="suggestions">
+				<ul className="suggestions">
 						{ suggestions.map(
 								(suggestion, index) => {  
 										return  <li 

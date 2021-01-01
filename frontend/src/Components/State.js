@@ -6,7 +6,8 @@ const initial_state = {
 		links: [],
 		selected:{},
 		definedNode:{},
-		graphType : '2D',
+		graphType: '2D',
+		prevGraphType:  'd3',
 		isError: false,
 		errorMsg: "",
 		isFetchFailed: false,
@@ -37,6 +38,11 @@ const stateReducer = (state, action) =>{
 								...state, 
 								links: [ ...state.links, ...action.payload ]
 						};
+				case 'SET_NEW_LINK':
+						return { 
+								...state, 
+								links: [ ...state.links, action.payload ]
+						};
 				case 'SET_NODE_LINK':
 						return { 
 								...state, 
@@ -47,6 +53,11 @@ const stateReducer = (state, action) =>{
 						return { 
 								...state, 
 								links: [],
+						};
+				case 'CLEAR_NODES':
+						return { 
+								...state, 
+								nodes: [],
 						};
 				case 'SET_STATE':
 						return { 
@@ -103,13 +114,13 @@ const stateReducer = (state, action) =>{
 						};
 				case 'SET_NODE_SELECTED':
 						return {
-								...state,
+								...state,// I have the feeling that this i adding oter nodes to te state
 								nodes: [ ...state.nodes, { ...action.payload, color: colors.node.selected }], // change color
 								selected: action.payload,
 						};
 				case 'SWITCH_SELECTED_NODE':
 						node = state.nodes.filter( node => node.id === action.payload )[0];
-						return {
+						return { 
 								...state,
 								nodes: [ 
 										...state.nodes, 
@@ -129,6 +140,11 @@ const stateReducer = (state, action) =>{
 								...state,
 								showModal: action.payload,
 						};
+				case 'CHANGE_D3_STATE':
+						return {
+								...state,
+								links: [],
+						}
 				case 'SET_WORD_NOT_FOUND':
 						return {
 								...state,
@@ -173,6 +189,9 @@ const stateReducer = (state, action) =>{
 				case 'SET_GRAPH_TYPE':
 						return {
 								...state,
+								// save the previous graph type
+								prevGraphType : state.graphType,
+								// set changed graph type
 								graphType: action.payload,
 						};
 				case 'SET_ERROR':
