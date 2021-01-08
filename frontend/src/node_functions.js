@@ -15,9 +15,10 @@ const processNode = (node) =>{
 		/* process a node from the api into one for the dispatcher
 		 * it changes title for id, for instance */
 		node['id'] = node.w_id;
-		node['label'] = node.w_id;
+		node['label'] = node.word;
 		node['key'] = node.w_id;
 		node['isSelected'] = false;
+		node['isDone'] = false;
 		node['color'] = colors.node.default;
 		return node
 }
@@ -34,14 +35,29 @@ const isNewNode = (nodeId, state) =>
 
 /* when user clicks on a node, query adjacent nodes
  * and set node as selected */
-const onClickNode = (nodeId, state, dispatchState) => {
-		queryAdjecentNodes(getNode(nodeId, state), state, dispatchState)
-		dispatchState({type:'SWITCH_SELECTED_NODE', payload: nodeId})};
+const onClickNode = (input, state, dispatchState) => {
+		let node 
+		if (typeof input == 'string'){
+				node = getNode(input, state.forceData);
+				queryAdjecentNodes(node, state, dispatchState)
+				dispatchState({type:'SET_NODE_DONE', payload: state.selected})
+				dispatchState({type:'SWITCH_SELECTED_NODE', payload: node})
+		}else{
+				node = input;
+				node['isDone'] = true;
+				node['color'] =  colors.node.selected;
+				state.selected['color'] = colors.node.done;
+				queryAdjecentNodes(node, state, dispatchState)
+				dispatchState({type:'SET_NODE_DONE', payload: state.selected})
+				dispatchState({type:'SWITCH_SELECTED_NODE', payload: node})
+		}
+};
 
 /* takes a dispachState functions and dispaches it in a 
 	 * random timply fashion this is usefulf for node not to 
 	 * appear all at once in the graph and make it easier on 
 	 * the browser. Returns nothing*/
+
 const timelyDispatch = (dispatchFunc , waitTime=0.5, random=0) => 
 		setTimeout(dispatchFunc, waitTime + getRandomInt(random));
 
@@ -50,12 +66,13 @@ const timelyDispatch = (dispatchFunc , waitTime=0.5, random=0) =>
  * this might be because of dispatchState being called twice
  * must investigate.  */
 const queryNewWord = (word, state, dispatchState) => {
-		console.log("query New owrd ran")
+		//console.log("query New owrd ran")
 		fetch(API_ENDPOINT + word) // fetch word
 				.then(result => result.json()) //unpack node
 				.then(result => catchError(result, state, dispatchState)) 
 		//check if word was found
 				.then(result => processNode(result)) //process node
+				.then(node => { node['color'] = colors.node.selected ; return node })//process node
 				.then(node => { //dispatch as new word
 						dispatchState({
 								type: 'SET_NEW_NODE', 
@@ -64,11 +81,10 @@ const queryNewWord = (word, state, dispatchState) => {
 						return node; })
 		// get the surrounding words
 				.then(node => { 
-						console.log("querying adhjacent nodes")
-						console.log(node)
+						//console.log("querying adhjacent nodes")
+						//console.log(node)
 						queryAdjecentNodes(node, state, dispatchState)
-				}
-				)
+				})
 				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 }
 
@@ -79,6 +95,8 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 		// define which type of graph we are requesting
 		let graph_type = 'synonyms/';
 		// request the synonyms
+		//console.log("node: ")
+		//console.log(node)
 		fetch(API_ENDPOINT + graph_type + node.id )
 				.then(result => result.json()) // unpack json
 				.then(adjNodes =>  
@@ -86,8 +104,8 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 								adjNode => timelyDispatch(() => {// dispacth timely
 										// for each of the nodes in the list 		
 										adjNode = processNode(adjNode); //process node 
-										console.log("node processed to dispatch")
-										console.log(adjNode)
+										//console.log("node processed to dispatch")
+										//console.log(adjNode)
 										// proces is it is new node, or deep link set
 										if(isNewNode(adjNode.id, state)){
 												// if it is a new node append 
@@ -96,8 +114,8 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 														payload: { 
 																node: adjNode,
 																link: { 
-																		source: node.id ,  
-																		target: adjNode.id 
+																		source: node,  
+																		target: adjNode, 
 																}
 														}
 												})
@@ -105,10 +123,11 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 												dispatchState({// if deep links is on , and it is a new node
 														type: 'SET_NEW_LINK', 
 														payload: { 
-																source: node.id ,  
-																target: adjNode.id 
+																source: node,  
+																target: getNode(adjNode.id, state.forceData), 
 														}
 												})
+
 										}
 								})
 						)

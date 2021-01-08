@@ -17,7 +17,6 @@ function AlertContainer({state, dispatchState}) {
 		
 		useEffect(() => { // run queh component mounted
 				let interval = null; 
-				console.log(percentage)
 				if (percentage < 115) { // while percentage is not complete
 						interval = setInterval(() => 
 								setPercentange(percentage => percentage + 3), 100);

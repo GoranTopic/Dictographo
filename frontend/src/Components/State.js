@@ -14,7 +14,7 @@ const initial_state = {
 		},
 		selected:{},
 		definedNode:{},
-		graphType: 'd3',
+		graphType: '2D',
 		isError: false,
 		errorMsg: "",
 		isFetchFailed: false,
@@ -34,9 +34,11 @@ const initial_state = {
 const stateReducer = (state, action) =>{
 		/* make reducer for the words data and internal state */
 		let node;
-		/* finds and colors the node */
-		const findNcolor = (selectedNode, color) => 
-				(node) => node.id === selectedNode? {...node, color: color }: node 
+		let stringLink 
+
+		/* finds a node with a given string and colors the node */
+		const findIdNcolor = (selectedNode, color) =>
+				(node) => node.id === selectedNode? {...node, color: color }: node; 
 		/* reomeves the duplicate node or link in a array */
 		const removeDuplicateWithSet = ( array ) =>{
 				let jsonObject = array.map(JSON.stringify); 
@@ -101,12 +103,17 @@ const stateReducer = (state, action) =>{
 								},
 						};
 				case 'SET_NEW_LINK':
+						stringLink = { 
+								...action.payload, 
+								source:action.payload.source.id,
+								target:action.payload.target.id 
+						}
 						return { 
 								...state, 
-								links: [ ...state.links, action.payload ],
+								links: [ ...state.links, stringLink ],
 								d3Data: {
 										...state.d3Data, 
-										links: [ ...state.d3Data.links, action.payload ],
+										links: removeDuplicateWithSet([ ...state.d3Data.links, stringLink ]),
 								},
 								forceData: {
 										...state.forceData, 
@@ -114,19 +121,24 @@ const stateReducer = (state, action) =>{
 								},
 						};
 				case 'SET_NODE_LINK':
+						stringLink = { 
+								...action.payload.link, 
+								source:action.payload.link.source.id,
+								target:action.payload.link.target.id 
+						}
 						return { 
 								...state, 
 								nodes: removeDuplicateNodes([ ...state.nodes, action.payload.node ]),
-								links: removeDuplicateLinks([ ...state.links, action.payload.link ]),
+								links: removeDuplicateLinks([ ...state.links, stringLink ]),
 								d3Data: {
 										...state.d3Data, 
-										nodes: removeDuplicateNodes([ ...state.d3Data.nodes, action.payload.node ]),
-										links: removeDuplicateWithSet([ ...state.d3Data.links, action.payload.link ]),
+										nodes: removeDuplicateNodes([ ...state.d3Data.nodes, { ...action.payload.node } ]),
+										links: removeDuplicateWithSet([ ...state.d3Data.links, stringLink ]),
 								},
 								forceData: {
 										...state.forceData, 
-										nodes: removeDuplicateNodes([ ...state.forceData.nodes, action.payload.node ]),
-										links: removeDuplicateLinks([ ...state.forceData.links, action.payload.link ]),
+										nodes: [ ...state.forceData.nodes, action.payload.node ],
+										links: [ ...state.forceData.links, stringLink  ],
 								},
 						};
 				case 'CLEAR_LINKS':
@@ -174,7 +186,7 @@ const stateReducer = (state, action) =>{
 				case 'SET_NEW_NODE':
 						return {
 								...state,
-								nodes: [ { ...action.payload, selected: true, color: colors.node.selected  } ],
+								nodes: [ { ...action.payload} ],
 								links: [],
 								d3Data: {
 										...state.d3Data, 
@@ -183,7 +195,7 @@ const stateReducer = (state, action) =>{
 								},
 								forceData: {
 										...state.forceData, 
-										nodes: [{ ...action.payload, selected: true, color: colors.node.selected } ],
+										nodes: [ action.payload  ],
 										links: [],
 								},
 								selected: action.payload, // save as selected
@@ -210,16 +222,13 @@ const stateReducer = (state, action) =>{
 								isEmpty: false,
 						};
 				case 'SET_NODE_DONE':
+						console.log("switch color to node:")
+						console.log(state.nodes.map(findIdNcolor(action.payload.id, colors.node.selected)))
 						return {
 								...state,
-								nodes: state.nodes.map(findNcolor(action.payload, colors.node.done)), 
 								d3Data: {
 										...state.d3Data, 
-										nodes: state.d3Data.nodes.map(findNcolor(action.payload, colors.node.done)), 
-								},
-								forceData: {
-										...state.forceData, 
-										nodes: state.forceData.nodes.map(findNcolor(action.payload, colors.node.done)), 
+										nodes: state.d3Data.nodes.map(findIdNcolor(action.payload.id, colors.node.done)), 
 								},
 								isEmpty: false,
 						};
@@ -232,21 +241,21 @@ const stateReducer = (state, action) =>{
 				case 'SET_NODE_SELECTED':
 						return {
 								...state,
-								nodes: state.nodes.map(findNcolor(action.payload, colors.node.selected)),
 								d3Data: {
 										...state.d3Data, 
-										nodes: state.d3Data.nodes.map(findNcolor(action.payload, colors.node.selected)), 
-								},
-								forceData: {
-										...state.forceData, 
-										nodes: state.forceData.nodes.map(findNcolor(action.payload, colors.node.selected)), 
+										nodes: state.d3Data.nodes.map(findIdNcolor(action.payload.id, colors.node.selected)), 
 								},
 								selected: action.payload,
 						};
 				case 'SWITCH_SELECTED_NODE':
+						console.log("switch color to node:")
+						console.log(state.nodes.map(findIdNcolor(action.payload.id, colors.node.selected)))
 						return { 
 								...state,
-								nodes: state.nodes.map(findNcolor(action.payload, colors.node.selected)),
+								d3Data: {
+										...state.d3Data, 
+										nodes: state.d3Data.nodes.map(findIdNcolor(action.payload.id, colors.node.selected)), 
+								},
 								selected: action.payload,
 								definedNode: action.payload,
 						};

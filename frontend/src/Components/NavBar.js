@@ -70,18 +70,16 @@ function NavBarContainer({ state, dispatchState }){
 						<Navbar.Brand href="index.html" className="row"  >
 								<h1>Dictographo</h1>
 						</Navbar.Brand>
-						<SuggestionsContainer
-								state={state}
-								dispatchState={dispatchState}
-								handleSearchSubmit={handleSearchSubmit} >
-								<InputGroup  size='lg' md='auto' className="pl-3" style={{maxWidth: "700px"}} >
-										<FormControl size="lg" as='input' type="text" placeholder="Write some words..." 
-												value={state.searchTerm} onChange={handleSearchChange} />
-										<InputGroup.Append className="pr-2" >
-												<Button size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
-										</InputGroup.Append>
-								</InputGroup>
-						</SuggestionsContainer>
+						<InputGroup  size='lg' md='auto' className="pl-3" style={{maxWidth: "700px"}} >
+								<InputGroup.Prepend>
+										<SuggestionsContainer state={state} dispatchState={dispatchState} handleSearchSubmit={handleSearchSubmit}/ >
+								</InputGroup.Prepend>
+								<FormControl size="lg" as='input' type="text" placeholder="Write some words..." 
+										value={state.searchTerm} onChange={handleSearchChange}/>
+								<InputGroup.Append className="pr-2" >
+										<Button size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
+								</InputGroup.Append>
+						</InputGroup>
 						<Navbar.Toggle aria-controls="responsive-navbar-nav" />
 						<Navbar.Collapse id="basic-navbar-nav" >
 								<Nav >

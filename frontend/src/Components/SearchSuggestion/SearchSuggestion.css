@@ -10,24 +10,22 @@ input {
 }
 
 .suggestions {
-		background-color: white;
+		background-color: white; 
 		border: 1px solid #999;
 		border-top-width: 0;
 		list-style: none;
 		margin-top: 0;
-		max-height: 25rem;
+		max-height: 24rem;
 		overflow-y: scroll;
 		padding-left: 0;
-		width: 20.6rem;
+		margin-top: 3rem;
+		width: 82.7%;
 		position: absolute;
 		border-radius: 0px 8px 0px 8px ;
 		box-sizing: border-box;
-		margin-right: 100px;
+		margin-right: 80px;
 		z-index: 100;
-		transform: translateX(15px);
 }
-
-
 
 .suggestions li {
 		padding: 0.5rem;

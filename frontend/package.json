@@ -26,7 +26,8 @@
     "react-force-graph-3d": "^1.18.8",
     "react-modal": "^3.11.2",
     "react-pro-sidebar": "^0.4.4",
-    "react-scripts": "3.4.3"
+    "react-scripts": "3.4.3",
+    "three-spritetext": "^1.5.3"
   },
   "scripts": {
     "start": "react-scripts start",
