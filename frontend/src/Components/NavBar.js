@@ -25,6 +25,7 @@ function NavBarContainer({ state, dispatchState }){
 
 		const handleSearchSubmit = () =>  {
 				/* handle submit search button */
+				// get words if there are multiple of them 
 				let words = getmultipleWords(state.searchTerm.toLowerCase());
 				// set all serches to lowercase
 				if(words.length > 1){
@@ -32,6 +33,7 @@ function NavBarContainer({ state, dispatchState }){
 						queryPath(words, state, dispatchState);
 				}else{ 
 						// if there is only one word
+						console.log("handeling search summit")
 						queryNewWord(words[0], state, dispatchState);
 				}
 		}
@@ -70,7 +72,8 @@ function NavBarContainer({ state, dispatchState }){
 						</Navbar.Brand>
 						<SuggestionsContainer
 								state={state}
-								dispatchState={dispatchState} >
+								dispatchState={dispatchState}
+								handleSearchSubmit={handleSearchSubmit} >
 								<InputGroup  size='lg' md='auto' className="pl-3" style={{maxWidth: "700px"}} >
 										<FormControl size="lg" as='input' type="text" placeholder="Write some words..." 
 												value={state.searchTerm} onChange={handleSearchChange} />

@@ -24,44 +24,44 @@ function GraphContainer({state, dispatchState}){
 				return d3State;
 		}
 
-
-
 		const handleClick = useCallback((nodeId) =>   //  handle click of node
 				(nodeId instanceof String)? 
 				onClickNode(nodeId, state, dispatchState)
 				: onClickNode(nodeId.id, state, dispatchState),
 				[state, dispatchState]);
-								
 				
 		const chosenGraph = (type) =>{ 
 				switch(type) {
 						case 'd3':
-								//console.log(state)
-								//console.log("checking the state")
-								//console.log(state)
+								console.log("checking the state")
+								console.log(state)
 								//console.log({...state, links:[]})
+								console.log("d3 data:")
+								console.log(state.d3Data)
 								return <Graph 
 										id="graph-id" 
 										// id is mandatory, 
 										// if no id is defined rd3g will throw an error
-										data={state}
-										config={graphConfig}
+										data={state.d3Data}
 										onClickNode={handleClick}
+										config={graphConfig}
 								/>
 						case '2D':
-								console.log("state deep cop passed")
+								console.log("checking the state")
 								console.log(state)
+								console.log("2D data:")
+								console.log(state.forceData)
 								return <ForceGraph2D
+										graphData={state.forceData}
 										enableNodeDrag={true}
 										onNodeClick={handleClick}
-										graphData={stateCopy(state)}
 								/>;
 						case '3D':
 								//console.log(state)
 								return <ForceGraph3D
 										enableNodeDrag={true}
 										onNodeClick={handleClick}
-										graphData={{...state}}
+										graphData={state.forceData}
 								/>;
 						default:
 								//console.log(state)

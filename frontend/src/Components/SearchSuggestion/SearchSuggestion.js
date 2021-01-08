@@ -18,6 +18,7 @@ function SuggestionsContainer(props){
 		// handle the change by seting the state variable to 
 		let state = props.state
 		let dispatchState = props.dispatchState;
+		let handleSearchSubmit =  props.handleSearchSubmit;
 		const [suggestions, setSuggestions] = useState([])	
 		const [selected, setSelected] = useState(0)	
 		
@@ -44,20 +45,17 @@ function SuggestionsContainer(props){
 		}
 
 		useKeypress('Enter', () => {
+				/* there is a bug where becuase the summit button is insdie the child component the 
+				 * Enter input is registered twice and handle serach summit run twice.
+				 * This caused duplicate links and nodes.
+				 * I fixed this by adding a checker and addit the link ony if it is new link, 
+				 * however the bug still there, beware*/
 				if(isWrittingWord()){
 						if(suggestions.length > 0){
 								addToSearchTerm(suggestions[selected].word);
 						}
 				}else{
-						let words = getmultipleWords(state.searchTerm.toLowerCase());
-						// set all serches to lowercase
-						if(words.length > 1){
-								//if it has more that two words
-								queryPath(words, state, dispatchState);
-						}else{ 
-								// if there is only one word
-								queryNewWord(words[0], state, dispatchState);
-						}
+						handleSearchSubmit();
 				}
 		})
 

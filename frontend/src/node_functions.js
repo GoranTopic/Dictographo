@@ -1,6 +1,5 @@
 import { colors, API_ENDPOINT }  from "./myConfig";
 import { getRandomInt }  from "./Components/RandomGenerator";
-
 /*
  * ==================================================
  *      Functions Definnitions for handeling changes
@@ -16,6 +15,7 @@ const processNode = (node) =>{
 		/* process a node from the api into one for the dispatcher
 		 * it changes title for id, for instance */
 		node['id'] = node.w_id;
+		node['label'] = node.w_id;
 		node['key'] = node.w_id;
 		node['isSelected'] = false;
 		node['color'] = colors.node.default;
@@ -31,12 +31,6 @@ const getNode = (nodeId, state) =>
  * could import time complexity by using a hash table */
 const isNewNode = (nodeId, state) => 
 		state.nodes.every( node => node.id !== nodeId )
-
-/* returns true link is not in state, 
- * could import time complexity by using a hash table */
-const isNewLink = (source, target, state) => 
-		state.links.every( link => link.source !== source 
-				|| link.target !== target )
 
 /* when user clicks on a node, query adjacent nodes
  * and set node as selected */
@@ -56,73 +50,73 @@ const timelyDispatch = (dispatchFunc , waitTime=0.5, random=0) =>
  * this might be because of dispatchState being called twice
  * must investigate.  */
 const queryNewWord = (word, state, dispatchState) => {
+		console.log("query New owrd ran")
 		fetch(API_ENDPOINT + word) // fetch word
-				.then(result => //unpack node
-						result.json())
-						.then(result => //check if word was found
-								catchError(result, state, dispatchState)) 
-						.then(result => //process node
-								processNode(result)) 
-						.then(node => { //dispatch as new word
-								dispatchState({
-										type: 'SET_NEW_NODE', 
-										payload: node
-								}); 
-								return node; })
-				.then(node => // get the surrounding words
-						queryAdjecentNodes(node, state, dispatchState))
-						.catch(() => 
-								dispatchState({type:'SET_FETCH_FAILED'}));
+				.then(result => result.json()) //unpack node
+				.then(result => catchError(result, state, dispatchState)) 
+		//check if word was found
+				.then(result => processNode(result)) //process node
+				.then(node => { //dispatch as new word
+						dispatchState({
+								type: 'SET_NEW_NODE', 
+								payload: node
+						}); 
+						return node; })
+		// get the surrounding words
+				.then(node => { 
+						console.log("querying adhjacent nodes")
+						console.log(node)
+						queryAdjecentNodes(node, state, dispatchState)
+				}
+				)
+				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}));
 }
 
 /* Fetch all the adjancent node of a given node and dispatch */
 const queryAdjecentNodes = (node, state, dispatchState) => {
 		// define whether we should link te deeper
-		//console.log(node)
 		let linkAll = state.isDeepLinks;
 		// define which type of graph we are requesting
 		let graph_type = 'synonyms/';
-		// fetch nodes
+		// request the synonyms
 		fetch(API_ENDPOINT + graph_type + node.id )
-				.then(result =>// request the synonyms
-						result.json())
-						.then(result =>// catch erros if there are any
-								catchError(result, state, dispatchState))
-						.then(adjNodes =>  
-								adjNodes.forEach(// for every node in the fetched array
-										adjNode => timelyDispatch(() => {// dispacth timely
-												// for each of the nodes in the list 		
-												adjNode = processNode(adjNode); //process node 
-												console.log(adjNode)
-												// proces is it is new node, or deep link set
-												if(isNewNode(adjNode.id, state)){
-														// if it is a new node append 
-														dispatchState({//dispatch node with link node
-																type: 'SET_NODE_LINK', 
-																payload: { 
-																		node: adjNode,
-																		link: { 
-																				source: node.id ,  
-																				target: adjNode.id 
-																		}
-																}
-														})
-												}else if(linkAll && isNewLink(node.id, adjNode.id, state)){
-														dispatchState({// if deep links is on , and it is a new node
-																type: 'SET_NEW_LINK', 
-																payload: { 
+				.then(result => result.json()) // unpack json
+				.then(adjNodes =>  
+						adjNodes.forEach(// for every node in the fetched array
+								adjNode => timelyDispatch(() => {// dispacth timely
+										// for each of the nodes in the list 		
+										adjNode = processNode(adjNode); //process node 
+										console.log("node processed to dispatch")
+										console.log(adjNode)
+										// proces is it is new node, or deep link set
+										if(isNewNode(adjNode.id, state)){
+												// if it is a new node append 
+												dispatchState({//dispatch node with link node
+														type: 'SET_NODE_LINK', 
+														payload: { 
+																node: adjNode,
+																link: { 
 																		source: node.id ,  
 																		target: adjNode.id 
 																}
-														})
-												}
-										})
-								)
-						).then(()=>{
-								console.log("state after newqord query")
-								console.log(state)
-						})
-						.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
+														}
+												})
+										}else if(linkAll){
+												dispatchState({// if deep links is on , and it is a new node
+														type: 'SET_NEW_LINK', 
+														payload: { 
+																source: node.id ,  
+																target: adjNode.id 
+														}
+												})
+										}
+								})
+						)
+				).then(()=>{
+						console.log("state after newqord query")
+						console.log(state)
+				})
+				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
 }
 
 
