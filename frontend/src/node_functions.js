@@ -36,21 +36,14 @@ const isNewNode = (nodeId, state) =>
 /* when user clicks on a node, query adjacent nodes
  * and set node as selected */
 const onClickNode = (input, state, dispatchState) => {
-		let node 
-		if (typeof input == 'string'){
-				node = getNode(input, state.forceData);
-				queryAdjecentNodes(node, state, dispatchState)
-				dispatchState({type:'SET_NODE_DONE', payload: state.selected})
-				dispatchState({type:'SWITCH_SELECTED_NODE', payload: node})
-		}else{
-				node = input;
-				node['isDone'] = true;
-				node['color'] =  colors.node.selected;
-				state.selected['color'] = colors.node.done;
-				queryAdjecentNodes(node, state, dispatchState)
-				dispatchState({type:'SET_NODE_DONE', payload: state.selected})
-				dispatchState({type:'SWITCH_SELECTED_NODE', payload: node})
-		}
+		let node = (typeof input == 'string')? 
+				getNode(input, state.forceData) : input;
+		state.selected['color'] = colors.node.done;
+		queryAdjecentNodes(node, state, dispatchState)
+		dispatchState({type:'SET_NODE_DONE', payload: state.selected})
+		dispatchState({type:'SWITCH_SELECTED_NODE', payload: node})
+		node['isDone'] = true;
+		node['color'] =  colors.node.selected;
 };
 
 /* takes a dispachState functions and dispaches it in a 
@@ -95,8 +88,6 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 		// define which type of graph we are requesting
 		let graph_type = 'synonyms/';
 		// request the synonyms
-		//console.log("node: ")
-		//console.log(node)
 		fetch(API_ENDPOINT + graph_type + node.id )
 				.then(result => result.json()) // unpack json
 				.then(adjNodes =>  
@@ -116,6 +107,7 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 																link: { 
 																		source: node,  
 																		target: adjNode, 
+																		//color: 'red',
 																}
 														}
 												})
@@ -125,17 +117,14 @@ const queryAdjecentNodes = (node, state, dispatchState) => {
 														payload: { 
 																source: node,  
 																target: getNode(adjNode.id, state.forceData), 
+																//color: 'red',
 														}
 												})
 
 										}
 								})
 						)
-				).then(()=>{
-						console.log("state after newqord query")
-						console.log(state)
-				})
-				.catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
+				).catch(() => dispatchState({type:'SET_FETCH_FAILED'}))
 }
 
 

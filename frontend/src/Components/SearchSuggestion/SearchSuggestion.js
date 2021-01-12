@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { API_ENDPOINT }  from "../../myConfig";
 import useKeypress from '../../hooks/useKeypress';
 import './SearchSuggestion.css'; 
-import { queryNewWord, queryPath } from '../../node_functions';
 
 /*
  * =======================================
@@ -18,7 +17,7 @@ function SuggestionsContainer(props){
 		// handle the change by seting the state variable to 
 		let state = props.state
 		let dispatchState = props.dispatchState;
-		let handleSearchSubmit =  props.handleSearchSubmit;
+		//let handleSearchSubmit =  props.handleSearchSubmit;
 		const [suggestions, setSuggestions] = useState([])	
 		const [selected, setSelected] = useState(0)	
 		
@@ -35,15 +34,6 @@ function SuggestionsContainer(props){
 				:setSelected(selected - 1)
 		);
 
-
-		const getmultipleWords = (string) => {
-				/* determines qhereteher a string 
-				 * is compossed of multiple words */
-				//remove multiple spaces
-				//trim, remove multiple and seperate by spaces
-				return string.replace(/  +/g, ' ').trim().split(' ') 
-		}
-
 		useKeypress('Enter', () => {
 				/* there is a bug where becuase the summit button is insdie the child component the 
 				 * Enter input is registered twice and handle serach summit run twice.
@@ -55,7 +45,15 @@ function SuggestionsContainer(props){
 								addToSearchTerm(suggestions[selected].word);
 						}
 				}else{
-						handleSearchSubmit();
+						/*
+						if (event.keyCode === 13) {
+								const form = event.target.form;
+								const index = Array.prototype.indexOf.call(form, event.target);
+								form.elements[index + 1].focus();
+								event.preventDefault();
+						}
+						*/
+						//handleSearchSubmit();
 				}
 		})
 

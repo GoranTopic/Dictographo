@@ -16,6 +16,8 @@ import { faSlidersH } from '@fortawesome/free-solid-svg-icons'
 
 function NavBarContainer({ state, dispatchState }){
 
+		const ref = React.createRef();
+
 		// handle the change by seting the state variable to 
 		const handleSearchChange = change => 
 				dispatchState({ 
@@ -33,7 +35,6 @@ function NavBarContainer({ state, dispatchState }){
 						queryPath(words, state, dispatchState);
 				}else{ 
 						// if there is only one word
-						console.log("handeling search summit")
 						queryNewWord(words[0], state, dispatchState);
 				}
 		}
@@ -77,7 +78,7 @@ function NavBarContainer({ state, dispatchState }){
 								<FormControl size="lg" as='input' type="text" placeholder="Write some words..." 
 										value={state.searchTerm} onChange={handleSearchChange}/>
 								<InputGroup.Append className="pr-2" >
-										<Button size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
+										<Button ref={ref} size="lg" variant="outline-info" onClick={handleSearchSubmit}>Search</Button>
 								</InputGroup.Append>
 						</InputGroup>
 						<Navbar.Toggle aria-controls="responsive-navbar-nav" />
@@ -87,13 +88,13 @@ function NavBarContainer({ state, dispatchState }){
 												title="Options" 
 												icon={<FontAwesomeIcon icon={faSlidersH}/>}
 												style={{backgroundColor: colors.black }} 
-												className="text-center ml-3 pl-3"
+												className="text-left ml-3 pl-3"
 										>
 												<Form.Group as={Col}>
 														<Form.Check
 																type="switch"
-																className="pb-1 text-center"
-																label="d3 Graph"
+																className="pb-1 ml-2 text-left"
+																label="Nodes"
 																value="d3"
 																name="formHorizontalRadios"
 																id="d3"
@@ -101,8 +102,8 @@ function NavBarContainer({ state, dispatchState }){
 																onChange={handleRadioGraphChange}/ >
 														<Form.Check
 																type="switch"
-																className="pb-1 text-center"
-																label="2D Graph"
+																className="pb-1 ml-2 text-left"
+																label="Words"
 																value="2D"
 																name="formHorizontalRadios"
 																id="formHorizontalRadios2"
@@ -110,8 +111,8 @@ function NavBarContainer({ state, dispatchState }){
 																onChange={handleRadioGraphChange} />
 														<Form.Check
 																type="switch"
-																className="pb-1 text-center"
-																label="3D Graph"
+																className="pb-1 ml-2 text-left"
+																label=" 3D"
 																value="3D"
 																name="formHorizontalRadios"
 																id="formHorizontalRadios3"

@@ -14,7 +14,7 @@ const initial_state = {
 		},
 		selected:{},
 		definedNode:{},
-		graphType: '2D',
+		graphType: 'd3',
 		isError: false,
 		errorMsg: "",
 		isFetchFailed: false,
@@ -106,7 +106,8 @@ const stateReducer = (state, action) =>{
 						stringLink = { 
 								...action.payload, 
 								source:action.payload.source.id,
-								target:action.payload.target.id 
+								target:action.payload.target.id,
+								color: colors.link.default,
 						}
 						return { 
 								...state, 
@@ -124,7 +125,8 @@ const stateReducer = (state, action) =>{
 						stringLink = { 
 								...action.payload.link, 
 								source:action.payload.link.source.id,
-								target:action.payload.link.target.id 
+								target:action.payload.link.target.id,
+								color: colors.link.default,
 						}
 						return { 
 								...state, 
@@ -138,7 +140,7 @@ const stateReducer = (state, action) =>{
 								forceData: {
 										...state.forceData, 
 										nodes: [ ...state.forceData.nodes, action.payload.node ],
-										links: [ ...state.forceData.links, stringLink  ],
+										links: [ ...state.forceData.links, stringLink ],
 								},
 						};
 				case 'CLEAR_LINKS':
@@ -222,8 +224,6 @@ const stateReducer = (state, action) =>{
 								isEmpty: false,
 						};
 				case 'SET_NODE_DONE':
-						console.log("switch color to node:")
-						console.log(state.nodes.map(findIdNcolor(action.payload.id, colors.node.selected)))
 						return {
 								...state,
 								d3Data: {
@@ -248,8 +248,6 @@ const stateReducer = (state, action) =>{
 								selected: action.payload,
 						};
 				case 'SWITCH_SELECTED_NODE':
-						console.log("switch color to node:")
-						console.log(state.nodes.map(findIdNcolor(action.payload.id, colors.node.selected)))
 						return { 
 								...state,
 								d3Data: {
