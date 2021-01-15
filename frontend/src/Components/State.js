@@ -105,9 +105,9 @@ const stateReducer = (state, action) =>{
 				case 'SET_NEW_LINK':
 						stringLink = { 
 								...action.payload, 
-								source:action.payload.source.id,
-								target:action.payload.target.id,
-								color: colors.link.default,
+								source: action.payload.source.id,
+								target: action.payload.target.id,
+								 color: colors.link.default,
 						}
 						return { 
 								...state, 
@@ -118,7 +118,7 @@ const stateReducer = (state, action) =>{
 								},
 								forceData: {
 										...state.forceData, 
-										links: [ ...state.forceData.links, action.payload ],
+										links: [ ...state.forceData.links, { ...action.payload, color: colors.link.default } ],
 								},
 						};
 				case 'SET_NODE_LINK':

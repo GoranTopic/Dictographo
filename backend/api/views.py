@@ -163,7 +163,7 @@ class QuerySearchDetail(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         ''' get a word and return a list of the json with requested word and neiboring words '''
         search_key = kwargs['pk']
-        min_search_key_length = 2
+        min_search_key_length = 1 # define the smallest search length accepted
         queried_list = []
         if len(search_key) >= min_search_key_length:  
             # if it is grater then the minimum size
