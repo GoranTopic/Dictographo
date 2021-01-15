@@ -10,7 +10,7 @@ const API_ENDPOINT = DEBUGGING ?
 
 function getWindowDimensions() {
 		const { innerWidth: width, innerHeight: height  } = window;
-		return { width, height };
+		return { width : width - 15, height: height - 87 };
 }
 
 const {width, height} = getWindowDimensions();
@@ -47,8 +47,8 @@ const  graphConfig = {
 		"focusAnimationDuration": 0.75,
 		"backgroundColor": "white",
 		"focusZoom": 1,
-		"height": height - 87,
-		"width": width - 15,
+		"height": height,
+		"width": width,
 		"highlightDegree": 100,
 		"highlightOpacity": 0.5,
 		"linkHighlightBehavior": true,

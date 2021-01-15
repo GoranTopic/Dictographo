@@ -1,4 +1,4 @@
-import React, { useCallback }  from 'react';
+import React, { useCallback, useEffect, useState }  from 'react';
 import { Graph } from "react-d3-graph";
 import { onClickNode } from '../../node_functions';
 import { colors, graphConfig }  from "../../myConfig";
@@ -21,6 +21,24 @@ function GraphContainer({state, dispatchState}){
 				onClickNode(nodeId, state, dispatchState)
 		}, [state, dispatchState]);
 
+		const [dimensions, setDimensions] = useState({ 
+				height: window.innerHeight - 87,
+				width: window.innerWidth - 15,
+		})
+
+		useEffect(() => {
+				function handleResize(){
+						setDimensions({
+								height: window.innerHeight - 87,
+								width: window.innerWidth - 15,
+						})
+				}
+				window.addEventListener('resize', handleResize)
+				return _ => {
+						window.removeEventListener('resize', handleResize)
+				}
+		});
+
 		const chosenGraph = (type) =>{ 
 				switch(type) {
 						case 'd3':
@@ -30,19 +48,21 @@ function GraphContainer({state, dispatchState}){
 										// if no id is defined rd3g will throw an error
 										data={state.d3Data}
 										onClickNode={handleClick}
-										config={graphConfig}
+										config={ {...graphConfig, height: dimensions.height, width: dimensions.width}}
 								/>
 						case '2D':
 								return <ForceGraph2D
 										graphData={state.forceData}
 										onNodeClick={handleClick}
 										nodeLabel="id"
+										height={dimensions.height}
+										width={dimensions.width}
 										nodeRelSize={5}
 										enableNodeDrag={true}
 										linkDirectionalArrowLength={1}
 										linkDirectionalArrowRelPos={1}
 										linkDirectionalParticles={0.5}
-										linkDirectionalParticleSpeed={0.005}
+										linkDirectionalParticleSpeed={0.003}
 										linkDirectionalParticleWidth={3}
 										linkWidth={1.8}
 										onNodeDragEnd={node => {
@@ -71,14 +91,16 @@ function GraphContainer({state, dispatchState}){
 										graphData={state.forceData}
 										onNodeClick={handleClick}
 										nodeLabel="id"
+										height={dimensions.height}
+										width={dimensions.width}
 										enableNodeDrag={true}
 										linkDirectionalArrowRelPos={1}
 										linkDirectionalArrowLength={1}
 										backgroundColor={'black'}
-										linkDirectionalParticles={2}
-										linkDirectionalParticleSpeed={0.03}
+										linkDirectionalParticles={1.5}
+										linkDirectionalParticleSpeed={0.005}
 										linkDirectionalParticleWidth={1}
-										linkWidth={0.8}
+										linkWidth={0.5}
 										onNodeDragEnd={node => {
 												node.fx = node.x;
 												node.fy = node.y;
@@ -86,7 +108,6 @@ function GraphContainer({state, dispatchState}){
 										}}
 										nodeThreeObject={node => {
 												const sprite = new SpriteText(node.id);
-												//sprite.color = (node.selected)? colors.node.selected : (node.color === colors.node.done)? colors.node.default : colors.node.done
 												sprite.color = (node.color === colors.node.selected)? node.color : (node.color === colors.node.done)? colors.node.default : colors.node.done;
 												sprite.textHeight = 8;
 												return sprite;
@@ -99,8 +120,8 @@ function GraphContainer({state, dispatchState}){
 										// id is mandatory, 
 										// if no id is defined rd3g will throw an error
 										data={state}
-										config={graphConfig}
 										onClickNode={handleClick}
+										config={ {...graphConfig, height: dimensions.height, width: dimensions.width}}
 								/>
 				} 
 		}
