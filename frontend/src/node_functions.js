@@ -264,6 +264,18 @@ const amendPath = async (paths) => {
 				return null; // reached the end
 		}
 
+		const removeSameStartingAndEnding = (paths) =>   
+				/* removes the past word of the path if the previous path start with the same word */
+				paths.forEach( (path, index, paths) => { 
+						try{  
+								let prevPath = paths[index-1]
+								if( path[0].w_id === prevPath[prevPath.length - 1].w_id ) 
+										path.shift();
+								
+						}catch ( error ){
+								console.error(error)
+						}
+				})
 
 		const bridgeGap = async (start, end, paths) => {
 				/* gets a set of indexes indicating the gap, 
@@ -293,17 +305,8 @@ const amendPath = async (paths) => {
 								.then( foundBridge )
 								.catch(err => console.log(err))
 				}
-		}
-
-		paths.forEach( (path, index, paths) => { 
-				if(index > 0){ 
-						let prevPath = paths[index-1]
-						if( path[0].w_id === prevPath[prevPath.length - 1].w_id ) {
-								path.shift();
-						} 
-				}
-		})
-
+		}	
+		removeSameStartingAndEnding(paths);
 		let gaps = getGaps(paths);
 		await Promise.all(gaps.map( gap => bridgeGap(gap.start, gap.end, paths)))
 		return paths;
