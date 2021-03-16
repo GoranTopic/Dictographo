@@ -21,11 +21,11 @@ class Definition(models.Model):
 class Example(models.Model):
     word = models.ForeignKey(Word, related_name="examples", on_delete=models.CASCADE)
     example = models.CharField(max_length=200, blank=True)
-    def __STR__(SELF):
+    def __str__(self):
         return self.word.word + ": " + self.example
 
 class Synonym_Relation(models.Model):
-    word_from = models.ForeignKey(Word, related_name='synonyms', on_delete=models.CASCADE)
+    word_from = models.ForeignKey(Word, related_name="synonyms", on_delete=models.CASCADE)
     synonym = models.ForeignKey(Word, on_delete=models.CASCADE)
     def __str__(self):
         return self.word_from.word + "  -->  " + self.synonym.word

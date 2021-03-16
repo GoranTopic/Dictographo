@@ -48,7 +48,7 @@ function GraphContainer({state, dispatchState}){
 										// if no id is defined rd3g will throw an error
 										data={state.d3Data}
 										onClickNode={handleClick}
-										config={ {...graphConfig, height: dimensions.height, width: dimensions.width}}
+										config={ {...graphConfig, height: dimensions.height, width: dimensions.width} }
 								/>
 						case '2D':
 								return <ForceGraph2D

@@ -215,7 +215,7 @@ const fetchPathsParts = async (pathRequests, dispatchState) => {
 }
 
 const amendPath = async (paths) => {
-		/* takes a list of paths and is there
+		/* takes a list of paths and if there
 		 * is a gap tries to find a connecting path*/
 		const getGaps = (paths) => {
 				/* takes a list of paths retusn a list of 
@@ -294,6 +294,16 @@ const amendPath = async (paths) => {
 								.catch(err => console.log(err))
 				}
 		}
+
+		paths.forEach( (path, index, paths) => { 
+				if(index > 0){ 
+						let prevPath = paths[index-1]
+						if( path[0].w_id === prevPath[prevPath.length - 1].w_id ) {
+								path.shift();
+						} 
+				}
+		})
+
 		let gaps = getGaps(paths);
 		await Promise.all(gaps.map( gap => bridgeGap(gap.start, gap.end, paths)))
 		return paths;
@@ -305,13 +315,12 @@ const amendPath = async (paths) => {
 const dispatchPath = (paths, state, dispatchState) => {
 		let finalPath = []; // declare final array
 		//if( paths isIntanceof Array) return null;
-				paths = paths.filter( Boolean ); // filter any null chars
+		paths = paths.filter( Boolean ); // filter any null chars
 		// add all paths together
 		paths.forEach(path => finalPath.push(...path)) 
-		//console.log(finalPath)
-		finalPath.forEach((node, index) =>//for every node in final path
+		// console.log(finalPath)
+		finalPath.forEach((node, index) => //for every node in final path
 				timelyDispatch(() => { // dispath in a timely order
-						//console.log(state.isEmpty)
 						if(index === 0){ // if this is the first node
 								dispatchState({ //dipatch as new node
 										type: 'SET_NEW_NODE', 
