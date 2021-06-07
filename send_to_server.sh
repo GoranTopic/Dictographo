@@ -1,4 +1,6 @@
 #!/bin/bash
+# A bash script that automates the process of sending the backend code and deplying it to the server
+# it uses ssh, thus you need to provide a user name and ip address
 
 cd ~/dictographo ;
 
