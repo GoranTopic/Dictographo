@@ -14,7 +14,7 @@ Have you ever wanted to know how close are two words in meaning?
 
 ## Usage
 
-Simply go to www.dictographo.com and write a word or two. 
+Simply go to [www.dictographo.com](http://147.182.241.239/Dictographo) and write a word or two. 
 
 ![big-search](assets/gifs/big-search.gif)
 
